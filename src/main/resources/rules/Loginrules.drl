@@ -1,0 +1,11 @@
+package com.aic.base.login;
+
+import com.aic.base.login.LoginDropDownRequestModel;
+
+rule "User Doesn't Exist"
+	when 
+		user: LoginDropDownRequestModel(companyCodes.isEmpty())
+	then
+		user.setErrorField("UserId");
+		user.setErrorMessage("User Doesn't Exist");
+	end
