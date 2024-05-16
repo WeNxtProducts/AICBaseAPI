@@ -258,7 +258,8 @@ public class LoginServiceImpl implements LoginService {
 
 			// Generate JWT token
 			token = jwtService.generateToken(auth);
-
+		
+			Optional<LM_MENU_USERS> menuUser = userrepo.findByUserId(login.getUserName());
 			// Check if authentication is successful
 			if (authentication.isAuthenticated()) {
 				boolean isFlagSet = checkFlagInMenuTable(authentication); // Check flag in lm_menu table
@@ -270,8 +271,12 @@ public class LoginServiceImpl implements LoginService {
 					response.put("Data", data);
 					return response.toString();
 				} else {
-					if (token != null) {
+					
+		            
+					if (token != null ) {
+						
 						data.put("Token", token);
+						data.put("group", menuUser.get().getUser_group_id());
 						data.put("MenuList", null);
 						response.put("Status", "SUCCESS");
 						response.put("status_msg", "User Logged In Successfully");

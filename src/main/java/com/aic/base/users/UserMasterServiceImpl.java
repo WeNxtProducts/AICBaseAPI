@@ -206,9 +206,7 @@ public class UserMasterServiceImpl implements UserMasterService {
 //		LocalDateTime dateTime = LocalDateTime.of(localDate, defautTime);
 //		String formattedDateTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss"));
 //		
-//		System.out.println(formattedDateTime);
-//
-//System.out.println("sdgdg");
+
 //		try {
 //			Map<String, String> formFields = requestData.getFrontForm().getFormFields();
 //			String userInitial = formFields.get("user_initial");
@@ -368,7 +366,7 @@ public class UserMasterServiceImpl implements UserMasterService {
 					}
 					if (key.equals("user_email_id")) {
 						user.setUserEmailId(value);
-						System.out.println("1" + value);
+						
 					}
 
 					try {
@@ -409,7 +407,7 @@ public class UserMasterServiceImpl implements UserMasterService {
 			        IndexResponse res = client.index(req, RequestOptions.DEFAULT);
 			        
 			        if (res.getResult() == Result.CREATED) {
-			        	  System.out.println("Document indexed successfully!");
+			        
 			        	} else {
 			        	  // Handle indexing failure
 			        	}
@@ -474,9 +472,9 @@ public class UserMasterServiceImpl implements UserMasterService {
 					 UpdateResponse updateResponse = client.update(updateRequest, RequestOptions.DEFAULT);
 
 					    if (updateResponse.getResult() == Result.UPDATED) {
-					        System.out.println("Document updated successfully");
+					      
 					    } else if (updateResponse.getResult() == Result.NOOP) {
-					        System.out.println("No changes made to the document");
+					        
 					    }
 				} catch (Exception e) {
 					e.printStackTrace();
