@@ -370,7 +370,7 @@ public class CommonServiceImpl implements CommonService {
 	params.remove("offset");
 	QUERY_MASTER query = commonDao.getQueryLov(queryId);
 	if (query != null) {
-		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(), limit, offset);
+		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(), offset, limit);
 		Map<String, Object> firstRow = queryResult.get(0);
 		Set<String> columnNames = firstRow.keySet();
 		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
