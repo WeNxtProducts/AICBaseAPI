@@ -41,7 +41,7 @@ public class CommonDaoImpl implements CommonDao {
 	@Override
 	public QUERY_MASTER getQueryLov(int queryId) {
 		try {
-	        String sql = "SELECT * FROM QUERY_MASTER WHERE QM_SYS_ID = ?";
+	        String sql = "SELECT * FROM LJM_QUERY_MASTER WHERE QM_SYS_ID = ?";
 	        QUERY_MASTER result = template.queryForObject(sql, new Object[] {queryId}, new BeanPropertyRowMapper<>(QUERY_MASTER.class));
 	        return result;
 	    } catch (EmptyResultDataAccessException e) {
@@ -94,7 +94,7 @@ public class CommonDaoImpl implements CommonDao {
 
 	@Override
 	public service_url_mapping getUrlData(AsyncDTO object) {
-		String sql = "SELECT * FROM service_url_mapping WHERE serv_prog_code = ? AND serv_screen_name = ? AND serv_service_name = ?";
+		String sql = "SELECT * FROM ljm_service_url_mapping WHERE serv_prog_code = ? AND serv_screen_name = ? AND serv_service_name = ?";
 		service_url_mapping result = template.queryForObject(sql, new Object[] {object.getScreenCode(), object.getScreenName(), object.getServiceName()}, new BeanPropertyRowMapper<>(service_url_mapping.class));
 		return result;
 	}
@@ -140,7 +140,7 @@ public class CommonDaoImpl implements CommonDao {
 
 	@Override
 	public List<MRVKeyValue> getMrvFetchList(Object object) {
-		String query = "SELECT QM_QUERY_NAME as queryName, QM_SYS_ID as queryId FROM QUERY_MASTER WHERE QM_SCREEN_NAME = ? AND QM_QUERY_TYPE = 'listingMrv'";
+		String query = "SELECT QM_QUERY_NAME as queryName, QM_SYS_ID as queryId FROM LJM_QUERY_MASTER WHERE QM_SCREEN_NAME = ? AND QM_QUERY_TYPE = 'listingMrv'";
 		List<MRVKeyValue> result =  template.query(query, new Object[] {object}, new BeanPropertyRowMapper<>(MRVKeyValue.class));
 		return result;
 	}

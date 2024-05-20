@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "service_url_mapping")
+@Table(name = "ljm_service_url_mapping")
 public class service_url_mapping
 {
 	@Id

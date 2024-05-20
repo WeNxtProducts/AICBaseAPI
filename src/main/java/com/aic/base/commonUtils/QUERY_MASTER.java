@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "QUERY_MASTER")
+@Table(name = "LJM_QUERY_MASTER")
 public class QUERY_MASTER
 {
 	
