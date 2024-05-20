@@ -77,6 +77,8 @@ public class SecurityConfig {
 				.and()
 				.authorizeHttpRequests().requestMatchers("/customer/**").authenticated() 
 				.and()
+				.authorizeHttpRequests().requestMatchers("/api/encryption/**").authenticated() 
+				.and()
 				.authorizeHttpRequests().requestMatchers("/auth/password_view").authenticated()
 				.and() 
 				.sessionManagement() 
