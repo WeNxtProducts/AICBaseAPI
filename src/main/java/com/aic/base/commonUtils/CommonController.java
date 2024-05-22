@@ -141,5 +141,15 @@ public class CommonController {
 	public String sampleEsSearch(HttpServletRequest request) {
 		return service.eSSearch(request);
 	}
+	
+	@GetMapping("/claimsEdit")
+	public String claimsEdit(HttpServletRequest request) {
+		try {
+			return service.claimsEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }

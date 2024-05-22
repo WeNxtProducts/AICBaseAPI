@@ -346,7 +346,6 @@ public class CommonServiceImpl implements CommonService {
 				List<QUERY_PARAM_MASTER> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
 				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
 				paramsMap.remove("queryId");
-				System.out.println(paramsMap);
 				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
 				response.put(statusCode, successCode);
 				response.put(dataCode, queryResult);
@@ -532,6 +531,9 @@ public class CommonServiceImpl implements CommonService {
 
 		File file = new File(filePath);
 		file.getParentFile().mkdirs();
+		
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
 
 		try {
 		    PrintWriter writer = new PrintWriter(file);
@@ -543,9 +545,11 @@ public class CommonServiceImpl implements CommonService {
 			JSONObject jsonObject = new JSONObject();
 			HttpHeaders headers = new HttpHeaders();
 			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.set("Authorization", "Bearer " + token);
 			HttpEntity<String> requestEntity = new HttpEntity<>(jsonObject.toString(), headers);
 			String url = getBaseURL + object.getserv_url() + "?" + "screenCode=" + params.get("screenCode")
 					+ "&screenName=" + params.get("screenName");
+			System.out.println(url);
 			ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {
 				String serviceResponse = responseEntity.getBody();
@@ -668,7 +672,7 @@ public class CommonServiceImpl implements CommonService {
 	
 	@Override
 	public String newEditTabs(HttpServletRequest request, JSONObject object) {
-		
+		System.out.println("*******************"+object);
 		JSONObject response = new JSONObject();
 		JSONObject headerInfo = new JSONObject();
 		JSONObject staticDetailsFormFields = new JSONObject();
@@ -685,6 +689,7 @@ public class CommonServiceImpl implements CommonService {
 		List<LM_PROG_FIELD_DEFN_NEW> listOfFields = commonDao.getFieldList(parametermap.get("screenCode").toString(),
 				parametermap.get("screenName").toString(), exeQuery.getQM_QUERY());
 		if (JSONempty == true) {
+			System.out.println("TRUE");
 			Map<String, Object> headerFieldsMap = listOfFields.stream()
 					.filter(item -> item.getPFD_FORM_ITEM_TYPE1().equals("HeaderInfo"))
 					.collect(Collectors.toMap(LM_PROG_FIELD_DEFN_NEW::getPFD_COLUMN_NAME, Function.identity()));
@@ -880,6 +885,24 @@ public class CommonServiceImpl implements CommonService {
 	        	e.printStackTrace();
 	        }    
 		return response.toString();
+	}
+
+	@Override
+	public String claimsEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = "http://192.168.1.150:8080//ltclaim/getltclaimByid?claim_TRAN_id=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer "+token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+		return newEditTabs(request, object);
+//		return response.toString();
 	}
 
 }

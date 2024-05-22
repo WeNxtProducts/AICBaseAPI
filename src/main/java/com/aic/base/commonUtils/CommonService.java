@@ -47,4 +47,6 @@ public interface CommonService {
 
 	public String eSSearch(HttpServletRequest request);
 
+	public String claimsEdit(HttpServletRequest request);
+
 }

@@ -230,12 +230,12 @@ public class LM_PROG_FIELD_DEFN_NEW
 	}
 
 	@Column(name = "PFD_HIDE_YN")
-	private String _PFD_HIDE_YN;
-	public String getPFD_HIDE_YN()
+	private boolean _PFD_HIDE_YN;
+	public boolean getPFD_HIDE_YN()
 	{
 		return this._PFD_HIDE_YN;
 	}
-	public void setPFD_HIDE_YN(String value)
+	public void setPFD_HIDE_YN(boolean value)
 	{
 		this._PFD_HIDE_YN = value;
 	}
