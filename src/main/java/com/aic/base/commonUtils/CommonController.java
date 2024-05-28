@@ -54,7 +54,7 @@ public class CommonController {
 	}
 	
 	@GetMapping("/getparamlov")
-	public String getQueryParamLov(@Context UriInfo uriInfo ,HttpServletRequest request) {
+	public String getQueryParamLov(HttpServletRequest request) {
 		return service.getQueryParamLOV(request);
 	}
 	
@@ -151,5 +151,25 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	
+	@GetMapping("/claimsEstimatEdit")
+	public String claimEstimateEdit(HttpServletRequest request) {
+		try {
+			return service.claimEstimateEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+//	@GetMapping("/claimsChargesEdit")
+//	public String claimChargesEdit(HttpServletRequest request) {
+//		try {
+//			return service.claimChargesEdit(request);
+//			}catch(Exception e) {
+//				e.printStackTrace();
+//				return e.getMessage();
+//			}
+//	}
 
 }

@@ -49,4 +49,6 @@ public interface CommonService {
 
 	public String claimsEdit(HttpServletRequest request);
 
+	public String claimEstimateEdit(HttpServletRequest request);
+
 }
