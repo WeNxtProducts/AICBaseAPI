@@ -223,7 +223,6 @@ public class LoginServiceImpl implements LoginService {
 			e.printStackTrace();
 		}
 		JSONArray jsonArray = (JSONArray) jsonObject.get("Data");
-		System.out.println(jsonArray);
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);

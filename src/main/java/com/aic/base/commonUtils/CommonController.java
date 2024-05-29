@@ -138,8 +138,8 @@ public class CommonController {
 	}
 	
 	@GetMapping("/userListSearch")
-	public String sampleEsSearch(HttpServletRequest request) {
-		return service.eSSearch(request);
+	public String userSearch(HttpServletRequest request) {
+		return service.userSearch(request);
 	}
 	
 	@GetMapping("/claimsEdit")
@@ -162,14 +162,24 @@ public class CommonController {
 			}
 	}
 	
-//	@GetMapping("/claimsChargesEdit")
-//	public String claimChargesEdit(HttpServletRequest request) {
-//		try {
-//			return service.claimChargesEdit(request);
-//			}catch(Exception e) {
-//				e.printStackTrace();
-//				return e.getMessage();
-//			}
-//	}
+	@GetMapping("/claimsBeneficiaryEdit")
+	public String claimBeneficiaryEdit(HttpServletRequest request) {
+		try {
+			return service.claimBeneficiaryEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/claimsChargesEdit")
+	public String claimChargesEdit(HttpServletRequest request) {
+		try {
+			return service.claimChargesEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }

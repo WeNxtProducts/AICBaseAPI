@@ -63,6 +63,7 @@ public class CommonDaoImpl implements CommonDao {
 		return result;
 		}
 		else {
+			System.out.println("INN" + paramsList);
 			List<LOVDTO> result = namedTemplate.query(query, paramsList, new BeanPropertyRowMapper<>(LOVDTO.class));
 			return result;
 		}

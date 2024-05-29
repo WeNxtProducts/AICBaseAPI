@@ -1,7 +1,6 @@
 package com.aic.base.commonUtils;
 
 import org.json.JSONObject;
-import org.springframework.scheduling.annotation.Async;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -45,10 +44,16 @@ public interface CommonService {
 
 	String newEditTabs(HttpServletRequest request, JSONObject object);
 
-	public String eSSearch(HttpServletRequest request);
+	public String userSearch(HttpServletRequest request);
 
 	public String claimsEdit(HttpServletRequest request);
 
 	public String claimEstimateEdit(HttpServletRequest request);
+	
+	public String elasticSearch(String document, HttpServletRequest request);
+
+	public String claimBeneficiaryEdit(HttpServletRequest request);
+
+	public String claimChargesEdit(HttpServletRequest request);
 
 }

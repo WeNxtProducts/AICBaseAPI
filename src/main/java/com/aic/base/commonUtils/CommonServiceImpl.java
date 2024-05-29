@@ -89,7 +89,7 @@ public class CommonServiceImpl implements CommonService {
 
 	@Value("${spring.project.basePath}")
 	private String basePath;
-	
+
 	@Value("${spring.crud.url}")
 	private String baseCrudPath;
 
@@ -301,6 +301,7 @@ public class CommonServiceImpl implements CommonService {
 
 	private Map<String, Object> processParamLOV(List<QUERY_PARAM_MASTER> queryParams, HttpServletRequest request) {
 		Map<String, Object> parameters = new HashMap<>();
+		Map<String, Object> parameteres = new HashMap<>();
 		if (queryParams != null) {
 			for (QUERY_PARAM_MASTER params : queryParams) {
 				if (params.getQPM_PARAM_TYPE().equals("S")) {
@@ -308,7 +309,7 @@ public class CommonServiceImpl implements CommonService {
 				} else if (params.getQPM_PARAM_TYPE().equals("P")) {
 					String queryString = request.getQueryString();
 					if (queryString != null) {
-						int i = 0;
+						int i=0;
 						for (String keyValue : queryString.split("&")) {
 							String[] parts = keyValue.split("=");
 							if (parts.length == 2 && !parts[0].equals("queryId")) {
@@ -316,6 +317,14 @@ public class CommonServiceImpl implements CommonService {
 								i++;
 							}
 						}
+//						int i = 0;
+//						for (String keyValue : queryString.split("&")) {
+//							String[] parts = keyValue.split("=");
+//							if (parts.length == 2 && !parts[0].equals("queryId")) {
+//								parameteres.put(queryParams.get(i).getQPM_PARAM_NAME(), parameters.get(queryParams.get(i).getQPM_PARAM_NAME()));
+//								i++;
+//							}
+//						}
 					}
 					return parameters;
 				}
@@ -823,71 +832,12 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public String eSSearch(HttpServletRequest request) {
-		JSONObject response = new JSONObject();
-		Map<String, Object> params = processParamLOV(null, request);
-		RestClientBuilder builder = RestClient.builder(new HttpHost("192.168.1.150", 9200, "http"));
-		RestHighLevelClient client = new RestHighLevelClient(builder);
-		ObjectMapper mapper = new ObjectMapper();
-
-		SearchRequest req = new SearchRequest("users");
-		SearchSourceBuilder builders = new SearchSourceBuilder();
-		builders.query(
-				QueryBuilders.boolQuery().should(QueryBuilders.multiMatchQuery(params.get("searchText")).field("*"))
-						.should(QueryBuilders.queryStringQuery("*" + params.get("searchText") + "*")));
-		builders.size(Integer.parseInt(params.get("limit").toString()));
-		builders.from(Integer.parseInt(params.get("offset").toString()));
-		req.source(builders);
-		QUERY_MASTER query = commonDao.getQueryLov(4);
-		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
-				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
-		List<Map<String, Object>> finalResult = new ArrayList<>();
-		Map<String, Object> finalMap = new HashMap<>();
-		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
-		String jsonString = "";
-		try {
-			SearchResponse searchResponse = client.search(req, RequestOptions.DEFAULT);
-			SearchHit[] searchHits = searchResponse.getHits().getHits();
-			UserIndex user = new UserIndex();
-			Class classs = user.getClass();
-			Map<String, Object> firstRow = queryResult.get(0);
-			Set<String> columnNames = firstRow.keySet();
-			String headString = (String) firstRow.get("Head");
-
-			String[] headingNames = headString.split(",");
-			for (String headingName : headingNames) {
-				heading.put(headingName.trim(), headingName.trim());
-			}
-			jsonString = mapper.writeValueAsString(heading);
-			for (SearchHit hit : searchHits) {
-				finalMap = new HashMap<>();
-//	        		 sampleESDB();
-				user = new UserIndex();
-				mapper.registerModule(new JavaTimeModule());
-				String documentId = hit.getId();
-				String sourceAsString = hit.getSourceAsString();
-				user = mapper.readValue(sourceAsString, UserIndex.class);
-				for (String headings : headingNames) {
-					String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
-							+ headings.substring(1, headings.length());
-					Method setter = classs.getMethod(setterMethodName);
-					Object value = setter.invoke(user);
-//						    if(value != null) {
-					finalMap.put(headings.trim(), value);
-//						    }else {
-//						    	finalMap.put(headings.trim(), "");
-//						    }
-				}
-				finalResult.add(finalMap);
-			}
-			response.put("Count", searchHits.length);
-			response.put("Heading", jsonString);
-			response.put(statusCode, successCode);
-			response.put(dataCode, finalResult);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return response.toString();
+	public String userSearch(HttpServletRequest request) {
+		
+		String documentName = "users";
+		
+		return elasticSearch(documentName, request);
+		
 	}
 
 	@Override
@@ -921,10 +871,117 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
-		
+
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "Claim estimate Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String elasticSearch(String document, HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		Map<String, Object> params = processParamLOV(null, request);
+		RestClientBuilder builder = RestClient.builder(new HttpHost("192.168.1.150", 9200, "http"));
+		RestHighLevelClient client = new RestHighLevelClient(builder);
+		ObjectMapper mapper = new ObjectMapper();
+
+		SearchRequest req = new SearchRequest(document);
+		SearchSourceBuilder builders = new SearchSourceBuilder();
+		builders.query(
+				QueryBuilders.boolQuery().should(QueryBuilders.multiMatchQuery(params.get("searchText")).field("*"))
+						.should(QueryBuilders.queryStringQuery("*" + params.get("searchText") + "*")));
+		builders.size(Integer.parseInt(params.get("limit").toString()));
+		builders.from(Integer.parseInt(params.get("offset").toString()));
+		req.source(builders);
+		QUERY_MASTER query = commonDao.getQueryLov(4);
+		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
+				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
+		List<Map<String, Object>> finalResult = new ArrayList<>();
+		Map<String, Object> finalMap = new HashMap<>();
+		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
+		String jsonString = "";
+		try {
+			SearchResponse searchResponse = client.search(req, RequestOptions.DEFAULT);
+			SearchHit[] searchHits = searchResponse.getHits().getHits();
+			UserIndex user = new UserIndex();
+			Class classs = user.getClass();
+			Map<String, Object> firstRow = queryResult.get(0);
+			Set<String> columnNames = firstRow.keySet();
+			String headString = (String) firstRow.get("Head");
+
+			String[] headingNames = headString.split(",");
+			for (String headingName : headingNames) {
+				heading.put(headingName.trim(), headingName.trim());
+			}
+			jsonString = mapper.writeValueAsString(heading);
+			for (SearchHit hit : searchHits) {
+				finalMap = new HashMap<>();
+				user = new UserIndex();
+				mapper.registerModule(new JavaTimeModule());
+				String documentId = hit.getId();
+				String sourceAsString = hit.getSourceAsString();
+				user = mapper.readValue(sourceAsString, UserIndex.class);
+				for (String headings : headingNames) {
+					String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
+							+ headings.substring(1, headings.length());
+					Method setter = classs.getMethod(setterMethodName);
+					Object value = setter.invoke(user);
+					finalMap.put(headings.trim(), value);
+				}
+				finalResult.add(finalMap);
+			}
+			response.put("Count", searchHits.length);
+			response.put("Heading", jsonString);
+			response.put(statusCode, successCode);
+			response.put(dataCode, finalResult);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return response.toString();
+	}
+
+	@Override
+	public String claimBeneficiaryEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "claimBfcry/getltclaimBfcryByid?cben_pben_TRAN_id=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Claim Beneficiary Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String claimChargesEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "claimchrgs/getclaimchrgsByid?cc_TRAN_id=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Claim Charges Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
 	}
