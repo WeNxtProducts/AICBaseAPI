@@ -361,8 +361,10 @@ public class CommonServiceImpl implements CommonService {
 				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
 				paramsMap.remove("queryId");
 				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
+				JSONObject responseData = new JSONObject();
+				responseData.put(query.getQM_QUERY_NAME(), queryResult);
 				response.put(statusCode, successCode);
-				response.put(dataCode, queryResult);
+				response.put(dataCode, responseData);
 			}
 		} else {
 			response.put(statusCode, errorCode);

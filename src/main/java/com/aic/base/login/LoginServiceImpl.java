@@ -134,7 +134,8 @@ public class LoginServiceImpl implements LoginService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		JSONArray jsonArray = (JSONArray) jsonObject.get("Data");
+		JSONObject dataObject = jsonObject.getJSONObject("Data");
+		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("get company");
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
@@ -189,7 +190,8 @@ public class LoginServiceImpl implements LoginService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		JSONArray jsonArray = (JSONArray) jsonObject.get("Data");
+		JSONObject dataObject = jsonObject.getJSONObject("Data");
+		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("get branch");
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
@@ -222,7 +224,8 @@ public class LoginServiceImpl implements LoginService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		JSONArray jsonArray = (JSONArray) jsonObject.get("Data");
+		JSONObject dataObject = jsonObject.getJSONObject("Data");
+		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("get department");
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
@@ -337,7 +340,8 @@ public class LoginServiceImpl implements LoginService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		JSONArray jsonArray = (JSONArray) jsonObject.get("Data");
+		JSONObject dataObject = jsonObject.getJSONObject("Data");
+		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("get language");
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
@@ -549,7 +553,8 @@ public class LoginServiceImpl implements LoginService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		JSONArray jsonArray = (JSONArray) jsonObject.get("Data");
+		JSONObject dataObject = jsonObject.getJSONObject("Data");
+		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("getCompany");
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
