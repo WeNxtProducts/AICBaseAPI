@@ -16,7 +16,7 @@ public interface EmailTemplateService {
 	
 	public String getTemplate(HttpServletRequest request, String screenCode, String screenName, Integer templateId);
 
-	public String createTemplateParam(EmailTemplateRequest emailTemplateModel);
+	public String createTemplateParam(EmailTemplateRequest emailTemplateModel, Integer templateId);
 
 	public String updateTemplateParam(EmailTemplateRequest emailTemplateModel, Integer pathParamId);
 

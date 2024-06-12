@@ -266,7 +266,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	}
 
 	@Override
-	public String createTemplateParam(EmailTemplateRequest emailTemplateParams) {
+	public String createTemplateParam(EmailTemplateRequest emailTemplateParams, Integer templateId) {
 		JSONObject response = new JSONObject();
 		JSONObject data = new JSONObject();
 
@@ -275,6 +275,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 			Map<String, Map<String, String>> fieldMaps = new HashMap<>();
 			fieldMaps.put("frontForm", emailTemplateParams.getEmailParams().getFormFields());
+			fieldMaps.get("frontForm").put("EP_ET_SYS_ID", templateId.toString());
 			for (Map.Entry<String, Map<String, String>> entry : fieldMaps.entrySet()) {
 				setTemplateParamFields(templateParam, entry.getValue());
 			}

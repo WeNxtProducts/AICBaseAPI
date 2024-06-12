@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.Path;
 
 @RestController
 @RequestMapping("/emailTemplate")
@@ -43,9 +44,9 @@ public class EmailTemplateController {
 		return emailTemplateService.getTemplate(request, screenCode, screenName, tranId);
 	}
 	
-	@PostMapping("/createTemplateParam")
-	public String createTemplateParam(@RequestBody EmailTemplateRequest emailTemplateModel) {
-		return emailTemplateService.createTemplateParam(emailTemplateModel);
+	@PostMapping("/createTemplateParam/{templateId}")
+	public String createTemplateParam(@RequestBody EmailTemplateRequest emailTemplateModel, @PathVariable Integer templateId) {
+		return emailTemplateService.createTemplateParam(emailTemplateModel, templateId);
 	}
 	
 	@PostMapping("/updateTemplateParam/{pathParamId}")
