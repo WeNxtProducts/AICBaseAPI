@@ -33,8 +33,8 @@ public class EmailTemplateController {
 		return emailTemplateService.updateTemplate(emailTemplateModel, templateId);
 	}
 	
-	@DeleteMapping("/deleteTemplate")
-	public String deleteTemplate(@RequestParam Integer templateId) {
+	@DeleteMapping("/deleteTemplate/templateId")
+	public String deleteTemplate(@PathVariable Integer templateId) {
 		return emailTemplateService.deleteTemplate(templateId);
 	}
 	
@@ -53,8 +53,8 @@ public class EmailTemplateController {
 		return emailTemplateService.updateTemplateParam(emailTemplateModel, pathParamId);
 	}
 	
-	@PostMapping("/deleteTemplateParam")
-	public String deleteTemplateParam(@RequestParam Integer templateId) {
+	@PostMapping("/deleteTemplateParam/templateId")
+	public String deleteTemplateParam(@PathVariable Integer templateId) {
 		return emailTemplateService.deleteTemplateParam(templateId);
 	}
 	
