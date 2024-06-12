@@ -266,51 +266,99 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	}
 
 	@Override
-	public String createTemplateParam(LjmEmailParamDTO emailTemplateParams) {
+	public String createTemplateParam(EmailTemplateRequest emailTemplateParams) {
 		JSONObject response = new JSONObject();
-		
+		JSONObject data = new JSONObject();
+
 		try {
-			LJM_EMAIL_PARAM emailTemplateParamModel = new LJM_EMAIL_PARAM();
-			emailTemplateParamModel.setEP_ET_SYS_ID(emailTemplateRepo.getById(emailTemplateParams.getEP_ET_SYS_ID()));
-			emailTemplateParamModel.setEP_PARAM_NAME(emailTemplateParams.getEP_PARAM_NAME());
-			emailTemplateParamModel.setEP_TYPE(emailTemplateParams.getEP_TYPE());
-			emailTemplateParamModel.setEP_VALUE(emailTemplateParams.getEP_VALUE());
-			
-			emailTemplateParamRepo.save(emailTemplateParamModel);
-			response.put(statusCode, successCode);
-			response.put(messageCode, "Email Template Param saved Successfully");
+			LJM_EMAIL_PARAM templateParam = new LJM_EMAIL_PARAM();
+
+			Map<String, Map<String, String>> fieldMaps = new HashMap<>();
+			fieldMaps.put("frontForm", emailTemplateParams.getEmailParams().getFormFields());
+			for (Map.Entry<String, Map<String, String>> entry : fieldMaps.entrySet()) {
+				setTemplateParamFields(templateParam, entry.getValue());
+			}
+
+			try {
+				LJM_EMAIL_PARAM savedTemplate = emailTemplateParamRepo.save(templateParam);
+				response.put(statusCode, successCode);
+				response.put(messageCode, "Email Template Param Created Successfully");
+				data.put("Id", savedTemplate.getEP_SYS_ID());
+				response.put("data", data);
+			} catch (Exception e) {
+				response.put("statusCode", errorCode);
+				response.put("message", "An error occurred: " + e.getMessage());
+			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.put(statusCode, errorCode);
-			response.put(messageCode, e.getMessage());
+			response.put("statusCode", errorCode);
+			response.put("message", "An error occurred: " + e.getMessage());
 		}
+
 		return response.toString();
 	}
 
-	@Override
-	public String updateTemplateParam(LjmEmailParamDTO emailTemplateParams) {
-		JSONObject response = new JSONObject();
+	private void setTemplateParamFields(LJM_EMAIL_PARAM templateParam, Map<String, String> value) throws Exception{
+		for (Map.Entry<String, String> entry : value.entrySet()) {
+			setTemplateParamField(templateParam, entry.getKey(), entry.getValue());
+		}
+	}
+
+	private void setTemplateParamField(LJM_EMAIL_PARAM templateParam, String key, String value) throws Exception{
 		try {
-			LJM_EMAIL_PARAM existingTemplate = emailTemplateParamRepo.getById(emailTemplateParams.getEP_SYS_ID());
-			if (existingTemplate != null) {
-				existingTemplate.setEP_SYS_ID(emailTemplateParams.getEP_SYS_ID());
-				existingTemplate.setEP_ET_SYS_ID(emailTemplateRepo.getById(emailTemplateParams.getEP_ET_SYS_ID()));
-				existingTemplate.setEP_PARAM_NAME(emailTemplateParams.getEP_PARAM_NAME());
-				existingTemplate.setEP_TYPE(emailTemplateParams.getEP_TYPE());
-				existingTemplate.setEP_VALUE(emailTemplateParams.getEP_VALUE());
+			Field field = LJM_EMAIL_PARAM.class.getDeclaredField(key);
+			Class<?> fieldType = field.getType();
+			Object convertedValue = null;
+			if(fieldType == LJM_EMAIL_TEMPLATE.class) {
+				convertedValue = getForeignObject(value);
+			}else {
+			convertedValue = convertStringToObject(value, fieldType);
+			}
+			String setterMethodName = "set" + key;
+			if (value != null && !value.isEmpty()) {
+				Method setter = LJM_EMAIL_PARAM.class.getMethod(setterMethodName, fieldType);
+				setter.invoke(templateParam, convertedValue);
+			}
+		} catch (NoSuchFieldException e) {
+//			e.printStackTrace();
+		}
+	}
 
-				emailTemplateParamRepo.save(existingTemplate);
+	private LJM_EMAIL_TEMPLATE getForeignObject(String value) {
+		LJM_EMAIL_TEMPLATE template = emailTemplateRepo.getById(Integer.parseInt(value));
+		return template;
+	}
 
-				response.put(statusCode, successCode);
-				response.put(messageCode, "Email Template Param Updated Successfully");
-			} else {
-				response.put(statusCode, errorCode);
-				response.put(messageCode, "No Such Template Exists");
+	@Override
+	public String updateTemplateParam(EmailTemplateRequest emailTemplateParams, Integer tempParamId) {
+		JSONObject response = new JSONObject();
+
+		try {
+			Integer templateParamId = tempParamId;
+			Optional<LJM_EMAIL_PARAM> optionalUser = emailTemplateParamRepo.findById(templateParamId);
+			LJM_EMAIL_PARAM templateParam = optionalUser.get();
+			if (templateParam != null) {
+				Map<String, Map<String, String>> fieldMaps = new HashMap<>();
+				fieldMaps.put("frontForm", emailTemplateParams.getEmailParams().getFormFields());
+				for (Map.Entry<String, Map<String, String>> entry : fieldMaps.entrySet()) {
+					setTemplateParamFields(templateParam, entry.getValue());
+				}
+
+				try {
+					LJM_EMAIL_PARAM savedParamDetails = emailTemplateParamRepo.save(templateParam);
+					response.put(statusCode, successCode);
+					response.put(messageCode, "Email Template Param Updated Successfully");
+				} catch (Exception e) {
+					response.put("statusCode", errorCode);
+					response.put("message", "An error occurred: " + e.getMessage());
+				}
 			}
 		} catch (Exception e) {
-			response.put(statusCode, errorCode);
-			response.put(messageCode, e.getMessage());
+			e.printStackTrace();
+			response.put("statusCode", errorCode);
+			response.put("message", "An error occurred: " + e.getMessage());
 		}
+
 		return response.toString();
 	}
 
@@ -336,8 +384,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	}
 
 	@Override
-	public String getTemplateParam(Integer templateId) {
-		System.out.println("IN");
+	public String getTemplateParam(HttpServletRequest request, String screenCode, String screenName, Integer templateId) {
 		JSONObject response = new JSONObject();
 		String result = null;
 		try {
@@ -350,7 +397,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				  
 				  JSONObject getObject = new JSONObject(templateData);
 				  
-				  result = commonServiceImpl.newEditTabs(null, getObject);
+				  result = commonServiceImpl.newEditTabs(request, getObject);
 				  
 				response.put(dataCode, templateData);
 			} else {
@@ -360,6 +407,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 		} catch (Exception e) {
 			response.put(statusCode, errorCode);
 			response.put(messageCode, e.getMessage());
+			e.printStackTrace();
 		}
 		return result;
 	}

@@ -2,6 +2,8 @@ package com.aic.base.emailTemplate;
 
 import java.sql.Date;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,19 +22,24 @@ public class LJM_EMAIL_PARAM {
   	@SequenceGenerator(name = "EmailTemplateParamSeq", sequenceName = "ET_SYS_ID_SEQ", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "EmailTemplateParamSeq")
 	@Column(name = "EP_SYS_ID")
+	@JsonProperty("EP_SYS_ID")
 	private Integer EP_SYS_ID;
 	
 	@ManyToOne
 	@JoinColumn(name = "EP_ET_SYS_ID")
+	@JsonProperty("EP_ET_SYS_ID")
 	private LJM_EMAIL_TEMPLATE EP_ET_SYS_ID;
 	
 	@Column(name = "EP_TYPE")
+	@JsonProperty("EP_TYPE")
 	private String EP_TYPE;
 	
 	@Column(name = "EP_PARAM_NAME")
+	@JsonProperty("EP_PARAM_NAME")
 	private String EP_PARAM_NAME;
 	
 	@Column(name = "EP_VALUE")
+	@JsonProperty("EP_VALUE")
 	private String EP_VALUE;
 	
 	@Column(name = "EP_INS_ID")

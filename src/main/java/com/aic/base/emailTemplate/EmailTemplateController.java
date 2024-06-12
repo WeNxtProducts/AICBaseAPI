@@ -44,23 +44,23 @@ public class EmailTemplateController {
 	}
 	
 	@PostMapping("/createTemplateParam")
-	public String createTemplateParam(@RequestBody LjmEmailParamDTO emailTemplateModel) {
+	public String createTemplateParam(@RequestBody EmailTemplateRequest emailTemplateModel) {
 		return emailTemplateService.createTemplateParam(emailTemplateModel);
 	}
 	
-	@PostMapping("/updateTemplateParam")
-	public String updateTemplateParam(@RequestBody LjmEmailParamDTO emailTemplateModel) {
-		return emailTemplateService.updateTemplateParam(emailTemplateModel);
+	@PostMapping("/updateTemplateParam/{pathParamId}")
+	public String updateTemplateParam(@RequestBody EmailTemplateRequest emailTemplateModel, @PathVariable Integer pathParamId) {
+		return emailTemplateService.updateTemplateParam(emailTemplateModel, pathParamId);
 	}
 	
-	@DeleteMapping("/deleteTemplateParam")
+	@PostMapping("/deleteTemplateParam")
 	public String deleteTemplateParam(@RequestParam Integer templateId) {
 		return emailTemplateService.deleteTemplateParam(templateId);
 	}
 	
 	@GetMapping("/getTemplateParam")
-	public String getTemplateParam(@RequestParam Integer templateId) {
-		return emailTemplateService.getTemplateParam(templateId);
+	public String getTemplateParam(HttpServletRequest request, @RequestParam String screenCode, @RequestParam String screenName, @RequestParam Integer tranId) {
+		return emailTemplateService.getTemplateParam(request, screenCode, screenName, tranId);
 	}
 	
 	@PostMapping("/testMail")

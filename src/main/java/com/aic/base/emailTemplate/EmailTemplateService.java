@@ -16,13 +16,13 @@ public interface EmailTemplateService {
 	
 	public String getTemplate(HttpServletRequest request, String screenCode, String screenName, Integer templateId);
 
-	public String createTemplateParam(LjmEmailParamDTO emailTemplateModel);
+	public String createTemplateParam(EmailTemplateRequest emailTemplateModel);
 
-	public String updateTemplateParam(LjmEmailParamDTO emailTemplateModel);
+	public String updateTemplateParam(EmailTemplateRequest emailTemplateModel, Integer pathParamId);
 
 	public String deleteTemplateParam(Integer templateId);
 
-	public String getTemplateParam(Integer templateId);
+	public String getTemplateParam(HttpServletRequest request, String screenCode, String screenName, Integer templateId);
 
 	public String sendMail(Integer templateId, EmailRequestModel object);
 
