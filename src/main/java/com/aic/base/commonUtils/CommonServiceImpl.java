@@ -10,6 +10,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.sql.ResultSet;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -38,11 +39,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import com.aic.base.logging.LoggerFunction;
 import com.aic.base.users.LM_MENU_USERS;
 import com.aic.base.users.UserIndex;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -59,6 +65,9 @@ public class CommonServiceImpl implements CommonService {
 
 	@Autowired
 	private AppAuditRepository auditRepo;
+	
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 
 	@Autowired
 	private AppExceptionRepository exceptionRepo;
@@ -309,7 +318,7 @@ public class CommonServiceImpl implements CommonService {
 				} else if (params.getQPM_PARAM_TYPE().equals("P")) {
 					String queryString = request.getQueryString();
 					if (queryString != null) {
-						int i=0;
+						int i = 0;
 						for (String keyValue : queryString.split("&")) {
 							String[] parts = keyValue.split("=");
 							if (parts.length == 2 && !parts[0].equals("queryId")) {
@@ -835,16 +844,15 @@ public class CommonServiceImpl implements CommonService {
 
 	@Override
 	public String userSearch(HttpServletRequest request) {
-		
+
 		String documentName = "users";
-		
+
 		return elasticSearch(documentName, request);
-		
+
 	}
 
 	@Override
 	public String claimsEdit(HttpServletRequest request) {
-		JSONObject response = new JSONObject();
 		String authorizationHeader = request.getHeader("Authorization");
 		String token = authorizationHeader.substring(7).trim();
 		Map<String, Object> params = processParamLOV(null, request);
@@ -986,6 +994,128 @@ public class CommonServiceImpl implements CommonService {
 		response.put(messageCode, "Claim Charges Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
+	}
+
+	@Override
+	public String claimCheckListEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "claimCheckList/getclaimCheckListByid?DTLS_TRAN_ID=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Claim CheckList Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public void testLog() {
+		LoggerFunction logger = new LoggerFunction();
+		logger.logToLJMLogs("TEST", null, "TEST");
+
+	}
+
+	@Override
+	public String invokeProcedure(String packageName, String procedureName, ProcedureInput procedureInput,
+			HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+
+		if (packageName == null || packageName.isEmpty() == true) {
+			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
+
+			try {
+				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
+	            SqlParameterSource parameterSource = new MapSqlParameterSource();
+
+	            // Get metadata for the stored procedure
+	            ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData().getProcedureColumns(null, null, procedureName, null);
+
+	            // Move the cursor to the first row of the result set
+	            while (resultSet.next()) {
+	                String parameterName = resultSet.getString("COLUMN_NAME");
+	                int parameterType = resultSet.getInt("COLUMN_TYPE");
+
+	                if (parameterType == 1) {
+	                    System.out.println("IN Parameter: " + parameterName);
+	                } else if (parameterType == 4) {
+	                    System.out.println("OUT Parameter: " + parameterName);
+	                }
+	            }
+				boolean successFlag = true;
+				for(String key : outParams.keySet()) {
+					if(outParams.get(key) == null) {
+						successFlag = false;
+					}
+				}
+				if(successFlag == true) {
+				response.put(statusCode, successCode);
+				response.put(dataCode, outParams);
+				}else {
+					response.put(statusCode, errorCode);
+					response.put(messageCode, "For the Selected Claim Type No Value's Present");
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				response.put(statusCode, errorCode);
+				response.put(messageCode, e.getMessage());
+			}
+		} else {
+			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
+					.withProcedureName(procedureName);
+
+			try {
+				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
+
+				response.put(statusCode, successCode);
+				response.put(dataCode, outParams);
+			} catch (Exception e) {
+				e.printStackTrace();
+				response.put(statusCode, errorCode);
+				response.put(messageCode, e.getMessage());
+			}
+		}
+
+		return response.toString();
+	}
+
+	@Override
+	@Async
+	public void invokeAsyncProcedure(String packageName, String procedureName, ProcedureInput procedureInput,
+			HttpServletRequest request) {
+
+		if (packageName == null || packageName.isEmpty() == true) {
+			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
+
+			try {
+
+				simpleJdbcCall.execute(procedureInput.getInParams());
+
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		} else {
+			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
+					.withProcedureName(procedureName);
+
+			try {
+				simpleJdbcCall.execute(procedureInput.getInParams());
+
+			} catch (Exception e) {
+				e.printStackTrace();
+
+			}
+		}
+
 	}
 
 }

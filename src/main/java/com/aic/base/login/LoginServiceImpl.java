@@ -340,8 +340,8 @@ public class LoginServiceImpl implements LoginService {
 		} catch (JSONException e) {
 			e.printStackTrace();
 		}
-		JSONObject dataObject = jsonObject.getJSONObject("Data");
-		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("get language");
+		JSONArray jsonArray = (JSONArray) jsonObject.getJSONArray("Data");
+//		JSONArray jsonArray = (JSONArray) dataObject.getJSONArray("get language");
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
@@ -618,9 +618,7 @@ public class LoginServiceImpl implements LoginService {
 
 			// Fetching branch list
 			if (user.getCompanyCode() != null) {
-				System.out.println();
 				url = baseURL + "20&divn_comp_code=" + user.getCompanyCode();
-				System.out.println(url);
 				responseEntity = restTemplate.getForEntity(url, String.class);
 				if (responseEntity.getStatusCode() == HttpStatus.OK) {
 					String serviceResponse = responseEntity.getBody();
@@ -721,11 +719,9 @@ public class LoginServiceImpl implements LoginService {
 				LM_MENU_USER_COMP newComp = new LM_MENU_USER_COMP();
 				Optional<LM_MENU_USERS> user = userrepo.findById(userId);
 				if (user.get() != null) {
-					System.out.println(user.get().getUserId() + companyCode);
 					newComp.setMuc_user_id(user.get());
 				}
 				newComp.setmuc_comp_code(companyCode);
-				System.out.println(newComp);
 				repo.save(newComp);
 				response.put(statusCode, successCode);
 				response.put(messageCode, "LM menu company created successfully");
@@ -737,10 +733,8 @@ public class LoginServiceImpl implements LoginService {
 			if (existingCompDivn != null) {
 				Optional<LM_MENU_USERS> user = userrepo.findById(userId);
 				if (user.get() != null) {
-					System.out.println(user.get().getUserId());
 					existingCompDivn.setMucd_user_id(user.get());
 				}
-				System.out.println(existingCompDivn.getMucd_id());
 				existingCompDivn.setMucd_comp_code(companyCode);
 
 				existingCompDivn.setMucd_divn_code(divisionCode);
@@ -756,7 +750,6 @@ public class LoginServiceImpl implements LoginService {
 					newCompDivn.setMucd_user_id(user.get());
 				}
 				newCompDivn.setMucd_comp_code(companyCode);
-				System.out.println(divisionCode + "*");
 				newCompDivn.setMucd_divn_code(divisionCode);
 				newCompDivn.setMucd_dept_code(departmentCode);
 				// Set other fields if needed

@@ -56,4 +56,12 @@ public interface CommonService {
 
 	public String claimChargesEdit(HttpServletRequest request);
 
+	public String claimCheckListEdit(HttpServletRequest request);
+	
+	public void testLog();
+
+	public String invokeProcedure(String packageName, String procedureName, ProcedureInput procedureInput, HttpServletRequest request);
+
+	public void invokeAsyncProcedure(String packageName, String procedureName, ProcedureInput procedureInput, HttpServletRequest request);
+
 }

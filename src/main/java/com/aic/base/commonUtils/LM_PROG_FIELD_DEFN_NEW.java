@@ -9,8 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
-import jakarta.ws.rs.DefaultValue;
-import lombok.Builder.Default;
 
 @Entity
 @Table(name = "LM_PROG_FIELD_DEFN")

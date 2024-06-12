@@ -4,14 +4,16 @@ import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 
 import com.aic.base.users.LM_MENU_USERS;
+
+import jakarta.mail.Session;
 
 
 
@@ -63,7 +65,6 @@ public class CommonDaoImpl implements CommonDao {
 		return result;
 		}
 		else {
-			System.out.println("INN" + paramsList);
 			List<LOVDTO> result = namedTemplate.query(query, paramsList, new BeanPropertyRowMapper<>(LOVDTO.class));
 			return result;
 		}
@@ -152,6 +153,12 @@ public class CommonDaoImpl implements CommonDao {
 		LM_CUSTOMER result =  template.queryForObject(query, new Object[] {object}, new BeanPropertyRowMapper<>(LM_CUSTOMER.class));
 		return result;
 	}
+	
+	@Override
+    public SqlRowSet executeQuery(String query, Map<String, Object> emailTemplateQueryParams) {
+        SqlRowSet result = namedTemplate.queryForRowSet(query, emailTemplateQueryParams);
+        return result;
+    }
 	
 	
 

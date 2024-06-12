@@ -1,7 +1,10 @@
 package com.aic.base.commonUtils;
 
+import java.sql.ResultSet;
 import java.util.List;
 import java.util.Map;
+
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 
 import com.aic.base.users.LM_MENU_USERS;
 
@@ -41,5 +44,7 @@ public interface CommonDao {
 	List<MRVKeyValue> getMrvFetchList(Object object);
 
 	LM_CUSTOMER getCustomerFields(String string, String string2, Object object);
+
+	SqlRowSet executeQuery(String query, Map<String, Object> emailTemplateQueryParams);
 
 }

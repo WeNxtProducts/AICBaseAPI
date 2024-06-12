@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,8 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.core.Context;
-import jakarta.ws.rs.core.UriInfo;
 
 @RestController
 @RequestMapping("/common")
@@ -179,6 +178,35 @@ public class CommonController {
 			}catch(Exception e) {
 				e.printStackTrace();
 				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/claimsCheckListEdit")
+	public String claimCheckListEdit(HttpServletRequest request) {
+		try {
+			return service.claimCheckListEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@PostMapping("/invokeProcedure")
+	public String invokeProcedure(@RequestParam String procedureName, @RequestParam(required = false)String packageName, @RequestBody ProcedureInput procedureInput, HttpServletRequest request) {
+		try {
+			return service.invokeProcedure(packageName, procedureName, procedureInput, request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@PostMapping("/invokeAsyncProcedure/{procedureName}/{packageName}")
+	public void invokeAsyncProcedure(@PathVariable String packageName, @PathVariable String procedureName, @RequestBody ProcedureInput procedureInput, HttpServletRequest request) {
+		try {
+			service.invokeAsyncProcedure(packageName, procedureName, procedureInput, request);
+			}catch(Exception e) {
+				e.printStackTrace();
 			}
 	}
 
