@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 @RestController
 @RequestMapping("/emailTemplate")
 public class EmailTemplateController {
@@ -37,8 +39,8 @@ public class EmailTemplateController {
 	}
 	
 	@GetMapping("/getTemplate")
-	public String getTemplate(@RequestParam Integer templateId) {
-		return emailTemplateService.getTemplate(templateId);
+	public String getTemplate(HttpServletRequest request, @RequestParam String screenCode, @RequestParam String screenName, @RequestParam Integer tranId) {
+		return emailTemplateService.getTemplate(request, screenCode, screenName, tranId);
 	}
 	
 	@PostMapping("/createTemplateParam")

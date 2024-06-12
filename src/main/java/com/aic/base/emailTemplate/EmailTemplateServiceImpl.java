@@ -25,6 +25,7 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import com.aic.base.commonUtils.CommonDao;
+import com.aic.base.commonUtils.CommonService;
 import com.aic.base.commonUtils.QUERY_MASTER;
 import com.aic.base.commonUtils.QUERY_PARAM_MASTER;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,6 +39,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
+import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class EmailTemplateServiceImpl implements EmailTemplateService {
@@ -47,6 +49,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	
 	@Autowired
 	private EmailTemplateParamRepo emailTemplateParamRepo;
+	
+	@Autowired
+	private CommonService commonServiceImpl;
 	
 	@Autowired
 	private CommonDao commonDao;
@@ -231,8 +236,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	}
 
 	@Override
-	public String getTemplate(Integer templateId) {
+	public String getTemplate(HttpServletRequest request, String screenCode, String screenName, Integer templateId) {
 		JSONObject response = new JSONObject();
+		String result = null;
 		try {
 			LJM_EMAIL_TEMPLATE existingTemplate = emailTemplateRepo.getById(templateId);
 			if (existingTemplate != null) {
@@ -241,7 +247,11 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				 ObjectMapper mapper = new ObjectMapper();
 				  Map<String, Object> templateData = mapper.convertValue(existingTemplate, Map.class);
 				  
-				  System.out.println(templateData);
+				  
+				  JSONObject getObject = new JSONObject(templateData);
+				  
+				  result = commonServiceImpl.newEditTabs(request, getObject);
+				  
 				response.put(dataCode, templateData);
 			} else {
 				response.put(statusCode, errorCode);
@@ -250,8 +260,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 		} catch (Exception e) {
 			response.put(statusCode, errorCode);
 			response.put(messageCode, e.getMessage());
+			e.printStackTrace();
 		}
-		return response.toString();
+		return result;
 	}
 
 	@Override
@@ -326,7 +337,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 	@Override
 	public String getTemplateParam(Integer templateId) {
+		System.out.println("IN");
 		JSONObject response = new JSONObject();
+		String result = null;
 		try {
 			LJM_EMAIL_PARAM existingTemplate = emailTemplateParamRepo.getById(templateId);
 			if (existingTemplate != null) {
@@ -334,6 +347,10 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				response.put(messageCode, "Email Template Details Fetched Successfully");
 				 ObjectMapper mapper = new ObjectMapper();
 				  Map<String, Object> templateData = mapper.convertValue(existingTemplate, Map.class);
+				  
+				  JSONObject getObject = new JSONObject(templateData);
+				  
+				  result = commonServiceImpl.newEditTabs(null, getObject);
 				  
 				response.put(dataCode, templateData);
 			} else {
@@ -344,7 +361,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			response.put(statusCode, errorCode);
 			response.put(messageCode, e.getMessage());
 		}
-		return response.toString();
+		return result;
 	}
 
 	@Override

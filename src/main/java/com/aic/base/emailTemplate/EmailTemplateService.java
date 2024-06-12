@@ -4,6 +4,8 @@ import org.json.JSONObject;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface EmailTemplateService {
 	
 	public String createNewTemplate(EmailTemplateRequest emailTemplateModel)  throws Exception;
@@ -12,7 +14,7 @@ public interface EmailTemplateService {
 	
 	public String deleteTemplate(Integer templateId);
 	
-	public String getTemplate(Integer templateId);
+	public String getTemplate(HttpServletRequest request, String screenCode, String screenName, Integer templateId);
 
 	public String createTemplateParam(LjmEmailParamDTO emailTemplateModel);
 

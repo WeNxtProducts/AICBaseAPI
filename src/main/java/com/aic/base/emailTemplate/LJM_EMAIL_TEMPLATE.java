@@ -21,24 +21,24 @@ public class LJM_EMAIL_TEMPLATE {
   	@SequenceGenerator(name = "EmailTemplateSeq", sequenceName = "ET_SYS_ID_SEQ", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "EmailTemplateSeq")
     @Column(name = "ET_SYS_ID")
-//    @JsonProperty("ET_SYS_ID")
+    @JsonProperty("ET_SYS_ID")
     private Integer ET_SYS_ID;
 
     @Column(name = "ET_TEMP_NAME")
-//    @JsonProperty("ET_TEMP_NAME")
+    @JsonProperty("ET_TEMP_NAME")
     private String ET_TEMP_NAME;
 
     @Column(name = "ET_TEMP_DESC")
-//    @JsonProperty("ET_TEMP_DESC")
+    @JsonProperty("ET_TEMP_DESC")
     private String ET_TEMP_DESC;
 
     @Column(name = "ET_ACTIVE_YN")
-//    @JsonProperty("ET_ACTIVE_YN")
+    @JsonProperty("ET_ACTIVE_YN")
     private String ET_ACTIVE_YN;
 
     @Lob
     @Column(name = "ET_MSG_BODY")
-//    @JsonProperty("ET_MSG_BODY")
+    @JsonProperty("ET_MSG_BODY")
     private String ET_MSG_BODY;
 
     @Column(name = "ET_INS_ID")
