@@ -190,7 +190,25 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	@GetMapping("/docPrintListEdit")
+	public String docPrintListEdit(HttpServletRequest request) {
+		try {
+			return service.docPrintListEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 	
+	@GetMapping("/docParamListEdit")
+	public String docParamListEdit(HttpServletRequest request) {
+		try {
+			return service.docParamListEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 	@PostMapping("/invokeProcedure")
 	public String invokeProcedure(@RequestParam String procedureName, @RequestParam(required = false)String packageName, @RequestBody ProcedureInput procedureInput, HttpServletRequest request) {
 		try {

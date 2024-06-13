@@ -65,7 +65,7 @@ public class CommonServiceImpl implements CommonService {
 
 	@Autowired
 	private AppAuditRepository auditRepo;
-	
+
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 
@@ -101,6 +101,10 @@ public class CommonServiceImpl implements CommonService {
 
 	@Value("${spring.crud.url}")
 	private String baseCrudPath;
+	
+	
+	@Value("${spring.docprint.url}")
+	private String baseDocPath;
 
 	@Value("${spring.project.baseUrl}")
 	private String getBaseURL;
@@ -1019,6 +1023,52 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
+	public String docPrintListEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		
+		
+		String url = baseDocPath + "docprintsetup/getDocPrintSetupbyid?dpsSysid=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Doc Print Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String docParamListEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseDocPath + "docparam/getdocparambyid?dppSysid=1" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Docprint Param Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
 	public void testLog() {
 		LoggerFunction logger = new LoggerFunction();
 		logger.logToLJMLogs("TEST", null, "TEST");
@@ -1035,32 +1085,33 @@ public class CommonServiceImpl implements CommonService {
 
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
-	            SqlParameterSource parameterSource = new MapSqlParameterSource();
+				SqlParameterSource parameterSource = new MapSqlParameterSource();
 
-	            // Get metadata for the stored procedure
-	            ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData().getProcedureColumns(null, null, procedureName, null);
+				// Get metadata for the stored procedure
+				ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData()
+						.getProcedureColumns(null, null, procedureName, null);
 
-	            // Move the cursor to the first row of the result set
-	            while (resultSet.next()) {
-	                String parameterName = resultSet.getString("COLUMN_NAME");
-	                int parameterType = resultSet.getInt("COLUMN_TYPE");
+				// Move the cursor to the first row of the result set
+				while (resultSet.next()) {
+					String parameterName = resultSet.getString("COLUMN_NAME");
+					int parameterType = resultSet.getInt("COLUMN_TYPE");
 
-	                if (parameterType == 1) {
-	                    System.out.println("IN Parameter: " + parameterName);
-	                } else if (parameterType == 4) {
-	                    System.out.println("OUT Parameter: " + parameterName);
-	                }
-	            }
+					if (parameterType == 1) {
+						System.out.println("IN Parameter: " + parameterName);
+					} else if (parameterType == 4) {
+						System.out.println("OUT Parameter: " + parameterName);
+					}
+				}
 				boolean successFlag = true;
-				for(String key : outParams.keySet()) {
-					if(outParams.get(key) == null) {
+				for (String key : outParams.keySet()) {
+					if (outParams.get(key) == null) {
 						successFlag = false;
 					}
 				}
-				if(successFlag == true) {
-				response.put(statusCode, successCode);
-				response.put(dataCode, outParams);
-				}else {
+				if (successFlag == true) {
+					response.put(statusCode, successCode);
+					response.put(dataCode, outParams);
+				} else {
 					response.put(statusCode, errorCode);
 					response.put(messageCode, "For the Selected Claim Type No Value's Present");
 				}

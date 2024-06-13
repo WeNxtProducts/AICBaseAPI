@@ -64,4 +64,8 @@ public interface CommonService {
 
 	public void invokeAsyncProcedure(String packageName, String procedureName, ProcedureInput procedureInput, HttpServletRequest request);
 
+	public String docPrintListEdit(HttpServletRequest request);
+
+	public String docParamListEdit(HttpServletRequest request);
+
 }
