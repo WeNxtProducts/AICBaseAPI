@@ -1,5 +1,6 @@
 package com.aic.base.emailTemplate;
 
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Properties;
+import java.util.Set;
 
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
@@ -23,13 +25,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.aic.base.commonUtils.CommonDao;
 import com.aic.base.commonUtils.CommonService;
 import com.aic.base.commonUtils.QUERY_MASTER;
 import com.aic.base.commonUtils.QUERY_PARAM_MASTER;
+import com.aic.base.logging.EmailLogsDTO;
+import com.aic.base.logging.LoggerFunctionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import jakarta.activation.DataHandler;
 import jakarta.mail.Message;
 import jakarta.mail.Multipart;
 import jakarta.mail.PasswordAuthentication;
@@ -39,6 +45,7 @@ import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeBodyPart;
 import jakarta.mail.internet.MimeMessage;
 import jakarta.mail.internet.MimeMultipart;
+import jakarta.mail.util.ByteArrayDataSource;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
@@ -58,6 +65,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	
 	@Autowired
 	private JavaMailSender javaMailSender;
+	
+	@Autowired
+	private LoggerFunctionService loggingService;
 	
 	@Value("${spring.success.code}")
 	private String successCode;
@@ -414,7 +424,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	}
 
 	@Override
-	public String sendMail(Integer templateId, EmailRequestModel inputObject) {
+	public String sendMail(Integer templateId, EmailRequestModel inputObject, HttpServletRequest request) {
+		
+		Map<String, MultipartFile> multiPartList = new HashMap<>();
 
 		JSONObject response = new JSONObject();
 		try {
@@ -521,6 +533,20 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			if (inputObject.getSubject() != null || !inputObject.getSubject().isEmpty()) {
 				paramMap.put("subject", inputObject.getSubject());
 			}
+			
+			StringBuilder attachments = new StringBuilder();
+			if (inputObject.getAttachments() != null && inputObject.getAttachments().size() > 0) {
+				Set<String> keys = inputObject.getAttachments().keySet();
+				for (String key : keys) {
+					attachments.append(key + ",");
+					BASE64DecodedMultipartFile conv = new BASE64DecodedMultipartFile(
+							(byte[]) inputObject.getAttachments().get(key).getBytes());
+					multiPartList.put(key, conv);
+				}
+			}
+			
+			Set<String> fileName = multiPartList.keySet();
+			
 
 			toIds.deleteCharAt(toIds.length() - 1);
 			ccIds.deleteCharAt(ccIds.length() - 1);
@@ -549,10 +575,31 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 			Multipart multipart = new MimeMultipart();
 			multipart.addBodyPart(mimeBodyPart);
+			
+			for (String filename : fileName) {
+			    MimeBodyPart attachmentPart = new MimeBodyPart();
+			    attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(multiPartList.get(filename).getBytes(), multiPartList.get(filename).getContentType())));
+			    attachmentPart.setFileName(filename);
+			    multipart.addBodyPart(attachmentPart);
+			}
+			
+			attachments.deleteCharAt(attachments.toString().length()-1);
 
 			message.setContent(multipart);
 
 			Transport.send(message);
+			
+			 Document doc = Jsoup.parse(formattedString);
+		     String con = doc.text();
+		     
+			
+			EmailLogsDTO logs = new EmailLogsDTO();
+			logs.setTo(toIds.toString());
+			logs.setTemplateName(emailTemplate.getET_TEMP_NAME());
+			logs.setTemplateBody(con);
+			logs.setGenDate(LocalDateTime.now());
+			
+			loggingService.logToEmailHistoryLogs(logs, request);
 			response.put(statusCode, successCode);
 			response.put(messageCode, "Mail Sent Successfully");
 		} catch (Exception e) {

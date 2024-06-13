@@ -3,6 +3,8 @@ package com.aic.base.emailTemplate;
 import java.util.List;
 import java.util.Map;
 
+import org.springframework.web.multipart.MultipartFile;
+
 public class EmailRequestModel {
 	
 	private List<String> toIds;
@@ -14,6 +16,8 @@ public class EmailRequestModel {
 	private String subject;
 	
 	private Map<String, Object> content;
+	
+	private Map<String, MultipartFile> attachments;
 
 	public List<String> getToIds() {
 		return toIds;
@@ -53,6 +57,14 @@ public class EmailRequestModel {
 
 	public void setContent(Map<String, Object> content) {
 		this.content = content;
+	}
+
+	public Map<String, MultipartFile> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(Map<String, MultipartFile> attachments) {
+		this.attachments = attachments;
 	}
 
 }

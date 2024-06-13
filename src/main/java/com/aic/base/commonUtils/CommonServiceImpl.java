@@ -1071,7 +1071,7 @@ public class CommonServiceImpl implements CommonService {
 	@Override
 	public void testLog() {
 		LoggerFunction logger = new LoggerFunction();
-		logger.logToLJMLogs("TEST", null, "TEST");
+//		logger.logToLJMLogs("TEST", null, "TEST");
 
 	}
 

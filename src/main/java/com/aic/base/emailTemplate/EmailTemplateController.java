@@ -34,7 +34,7 @@ public class EmailTemplateController {
 		return emailTemplateService.updateTemplate(emailTemplateModel, templateId);
 	}
 	
-	@DeleteMapping("/deleteTemplate/templateId")
+	@PostMapping("/deleteTemplate/{templateId}")
 	public String deleteTemplate(@PathVariable Integer templateId) {
 		return emailTemplateService.deleteTemplate(templateId);
 	}
@@ -54,7 +54,7 @@ public class EmailTemplateController {
 		return emailTemplateService.updateTemplateParam(emailTemplateModel, pathParamId);
 	}
 	
-	@PostMapping("/deleteTemplateParam/templateId")
+	@PostMapping("/deleteTemplateParam/{templateId}")
 	public String deleteTemplateParam(@PathVariable Integer templateId) {
 		return emailTemplateService.deleteTemplateParam(templateId);
 	}
@@ -65,8 +65,8 @@ public class EmailTemplateController {
 	}
 	
 	@PostMapping("/testMail")
-	public String sendMail(@RequestParam Integer templateId, @RequestBody EmailRequestModel object) {
-		return emailTemplateService.sendMail(templateId, object);
+	public String sendMail(@RequestParam Integer templateId, @RequestBody EmailRequestModel object, HttpServletRequest request) {
+		return emailTemplateService.sendMail(templateId, object, request);
 	}
 
 }

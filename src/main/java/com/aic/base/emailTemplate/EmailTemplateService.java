@@ -24,6 +24,6 @@ public interface EmailTemplateService {
 
 	public String getTemplateParam(HttpServletRequest request, String screenCode, String screenName, Integer templateId);
 
-	public String sendMail(Integer templateId, EmailRequestModel object);
+	public String sendMail(Integer templateId, EmailRequestModel object, HttpServletRequest request);
 
 }
