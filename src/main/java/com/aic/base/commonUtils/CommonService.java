@@ -68,4 +68,6 @@ public interface CommonService {
 
 	public String docParamListEdit(HttpServletRequest request);
 
+	public String reportBuilderEdit(HttpServletRequest request);
+
 }

@@ -227,5 +227,15 @@ public class CommonController {
 				e.printStackTrace();
 			}
 	}
+	
+	@GetMapping("/reportBuilderEdit")
+	public String reportBuilderEdit(HttpServletRequest request) {
+		try {
+			return service.reportBuilderEdit(request);
+		}catch(Exception e){
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
 
 }
