@@ -17,7 +17,7 @@ public class EmailRequestModel {
 	
 	private Map<String, Object> content;
 	
-	private Map<String, MultipartFile> attachments;
+	private Map<String, byte[]> attachments;
 
 	public List<String> getToIds() {
 		return toIds;
@@ -59,11 +59,11 @@ public class EmailRequestModel {
 		this.content = content;
 	}
 
-	public Map<String, MultipartFile> getAttachments() {
+	public Map<String, byte[]> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(Map<String, MultipartFile> attachments) {
+	public void setAttachments(Map<String, byte[]> attachments) {
 		this.attachments = attachments;
 	}
 

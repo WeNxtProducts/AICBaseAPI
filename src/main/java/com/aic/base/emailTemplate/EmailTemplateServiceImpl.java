@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -538,9 +539,14 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			if (inputObject.getAttachments() != null && inputObject.getAttachments().size() > 0) {
 				Set<String> keys = inputObject.getAttachments().keySet();
 				for (String key : keys) {
+					
+//					byte[] byteArray = Base64.getDecoder().decode(inputObject.getAttachments().get(key));
+//					for(int i=0; i<byteArray.length; i++) {
+//						System.out.println(byteArray[i]);
+//					}
 					attachments.append(key + ",");
 					BASE64DecodedMultipartFile conv = new BASE64DecodedMultipartFile(
-							(byte[]) inputObject.getAttachments().get(key).getBytes());
+							inputObject.getAttachments().get(key));
 					multiPartList.put(key, conv);
 				}
 			}
@@ -578,10 +584,21 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			
 			for (String filename : fileName) {
 			    MimeBodyPart attachmentPart = new MimeBodyPart();
-			    attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(multiPartList.get(filename).getBytes(), multiPartList.get(filename).getContentType())));
+			    // Set the content type based on the file extension or use a default type
+			    String contentType = "application/octet-stream"; // Default content type
+			    // Adjust content type based on file extension if needed
+			    if (filename.endsWith(".pdf")) {
+			        contentType = "application/pdf";
+			    } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+			        contentType = "image/jpeg";
+			    } else if (filename.endsWith(".json")) {
+			        contentType = "application/json";
+			    }
+			    
+			    attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(multiPartList.get(filename).getBytes(), contentType)));
 			    attachmentPart.setFileName(filename);
 			    multipart.addBodyPart(attachmentPart);
-			}
+}
 			
 			attachments.deleteCharAt(attachments.toString().length()-1);
 
