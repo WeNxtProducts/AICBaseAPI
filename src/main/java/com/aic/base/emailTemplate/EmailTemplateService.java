@@ -26,4 +26,8 @@ public interface EmailTemplateService {
 
 	public String sendMail(Integer templateId, EmailRequestModel object, HttpServletRequest request);
 
+	public String startAutoDispatch(String eventId);
+
+	public String getEmailQueries();
+
 }

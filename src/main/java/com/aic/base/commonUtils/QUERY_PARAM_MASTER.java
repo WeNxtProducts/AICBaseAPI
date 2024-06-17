@@ -1,10 +1,15 @@
 package com.aic.base.commonUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -12,93 +17,100 @@ import jakarta.persistence.Table;
 public class QUERY_PARAM_MASTER
 {
 	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+  	@SequenceGenerator(name = "QueryParamMasterSeq", sequenceName = "QPM_SYS_ID_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "QueryParamMasterSeq")
 	@Column(name = "QPM_SYS_ID")
-	private int _QPM_SYS_ID;
-	public int getQPM_SYS_ID()
+	@JsonProperty("QPM_SYS_ID")
+	private Integer QPM_SYS_ID;
+	public Integer getQPM_SYS_ID()
 	{
-		return this._QPM_SYS_ID;
+		return this.QPM_SYS_ID;
 	}
-	public void setQPM_SYS_ID(int value)
+	public void setQPM_SYS_ID(Integer value)
 	{
-		this._QPM_SYS_ID = value;
+		this.QPM_SYS_ID = value;
 	}
 
-	@Column(name = "QPM_QM_SYS_ID")
-	private int _QPM_QM_SYS_ID;
-	public int getQPM_QM_SYS_ID()
+	@ManyToOne
+	@JoinColumn(name = "QPM_QM_SYS_ID")
+	@JsonProperty("QPM_QM_SYS_ID")
+	private QUERY_MASTER QPM_QM_SYS_ID;
+	public QUERY_MASTER getQPM_QM_SYS_ID()
 	{
-		return this._QPM_QM_SYS_ID;
+		return this.QPM_QM_SYS_ID;
 	}
-	public void setQPM_QM_SYS_ID(int value)
+	public void setQPM_QM_SYS_ID(QUERY_MASTER value)
 	{
-		this._QPM_QM_SYS_ID = value;
+		this.QPM_QM_SYS_ID = value;
 	}
 
 	@Column(name = "QPM_PARAM_TYPE")
-	private String _QPM_PARAM_TYPE;
+	@JsonProperty("QPM_PARAM_TYPE")
+	private String QPM_PARAM_TYPE;
 	public String getQPM_PARAM_TYPE()
 	{
-		return this._QPM_PARAM_TYPE;
+		return this.QPM_PARAM_TYPE;
 	}
 	public void setQPM_PARAM_TYPE(String value)
 	{
-		this._QPM_PARAM_TYPE = value;
+		this.QPM_PARAM_TYPE = value;
 	}
 
 	@Column(name = "QPM_PARAM_NAME")
-	private String _QPM_PARAM_NAME;
+	@JsonProperty("QPM_PARAM_NAME")
+	private String QPM_PARAM_NAME;
 	public String getQPM_PARAM_NAME()
 	{
-		return this._QPM_PARAM_NAME;
+		return this.QPM_PARAM_NAME;
 	}
 	public void setQPM_PARAM_NAME(String value)
 	{
-		this._QPM_PARAM_NAME = value;
+		this.QPM_PARAM_NAME = value;
 	}
 
 	@Column(name = "QPM_PARAM_VALUE")
-	private String _QPM_PARAM_VALUE;
+	@JsonProperty("QPM_PARAM_VALUE")
+	private String QPM_PARAM_VALUE;
 	public String getQPM_PARAM_VALUE()
 	{
-		return this._QPM_PARAM_VALUE;
+		return this.QPM_PARAM_VALUE;
 	}
 	public void setQPM_PARAM_VALUE(String value)
 	{
-		this._QPM_PARAM_VALUE = value;
+		this.QPM_PARAM_VALUE = value;
 	}
 
-	@Column(name = "QPM_CR_DT")
-	private java.sql.Timestamp _QPM_CR_DT;
-	public java.sql.Timestamp getQPM_CR_DT()
+	@Column(name = "QPM_INS_DT")
+	private java.sql.Timestamp QPM_INS_DT;
+	public java.sql.Timestamp getQPM_INS_DT()
 	{
-		return this._QPM_CR_DT;
+		return this.QPM_INS_DT;
 	}
-	public void setQPM_CR_DT(java.sql.Timestamp value)
+	public void setQPM_INS_DT(java.sql.Timestamp value)
 	{
-		this._QPM_CR_DT = value;
-	}
-
-	@Column(name = "QPM_CR_UID")
-	private String _QPM_CR_UID;
-	public String getQPM_CR_UID()
-	{
-		return this._QPM_CR_UID;
-	}
-	public void setQPM_CR_UID(String value)
-	{
-		this._QPM_CR_UID = value;
+		this.QPM_INS_DT = value;
 	}
 
-	@Column(name = "QPM_UPD_DTM")
-	private java.sql.Timestamp _QPM_UPD_DTM;
-	public java.sql.Timestamp getQPM_UPD_DTM()
+	@Column(name = "QPM_INS_ID")
+	private String QPM_INS_ID;
+	public String getQPM_INS_ID()
 	{
-		return this._QPM_UPD_DTM;
+		return this.QPM_INS_ID;
 	}
-	public void setQPM_UPD_DTM(java.sql.Timestamp value)
+	public void setQPM_INS_ID(String value)
 	{
-		this._QPM_UPD_DTM = value;
+		this.QPM_INS_ID = value;
+	}
+
+	@Column(name = "QPM_MOD_DT")
+	private java.sql.Timestamp QPM_MOD_DT;
+	public java.sql.Timestamp getQPM_MOD_DT()
+	{
+		return this.QPM_MOD_DT;
+	}
+	public void setQPM_MOD_DT(java.sql.Timestamp value)
+	{
+		this.QPM_MOD_DT = value;
 	}
 
 }

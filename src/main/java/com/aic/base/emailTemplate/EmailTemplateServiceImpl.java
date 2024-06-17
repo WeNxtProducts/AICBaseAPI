@@ -1,6 +1,5 @@
 package com.aic.base.emailTemplate;
 
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.text.ParseException;
@@ -9,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.aic.base.commonUtils.CommonDao;
 import com.aic.base.commonUtils.CommonService;
+import com.aic.base.commonUtils.LOVDTO;
 import com.aic.base.commonUtils.QUERY_MASTER;
 import com.aic.base.commonUtils.QUERY_PARAM_MASTER;
 import com.aic.base.logging.EmailLogsDTO;
@@ -59,11 +58,15 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	private EmailTemplateParamRepo emailTemplateParamRepo;
 	
 	@Autowired
+	private AutoDispSetupRepo autoDispSetupRepo;
+	
+	@Autowired
 	private CommonService commonServiceImpl;
 	
 	@Autowired
 	private CommonDao commonDao;
 	
+	@SuppressWarnings("unused")
 	@Autowired
 	private JavaMailSender javaMailSender;
 	
@@ -93,7 +96,6 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 	@Override
 	public String createNewTemplate(EmailTemplateRequest emailTemplateDto) {
-		System.out.println("IN");
 		JSONObject response = new JSONObject();
 		JSONObject data = new JSONObject();
 
@@ -407,6 +409,11 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				 ObjectMapper mapper = new ObjectMapper();
 				  Map<String, Object> templateData = mapper.convertValue(existingTemplate, Map.class);
 				  
+				  if(existingTemplate.getEP_TYPE().equals("Q")) {
+					  QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(existingTemplate.getEP_VALUE()));
+					  templateData.put("EP_QUERY", query.getQM_QUERY());
+				  }
+				  
 				  JSONObject getObject = new JSONObject(templateData);
 				  
 				  result = commonServiceImpl.newEditTabs(request, getObject);
@@ -473,6 +480,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 						SqlRowSet result = commonDao.executeQuery(query, emailTemplateQueryParams);
 
 						while (result.next()) {
+							toIds.append(result.getObject(1) + ",");
 							paramMap.put(param.getEP_PARAM_NAME(), result.getObject(1));
 						}
 					} else if (param.getEP_PARAM_NAME().equals("cc")) {
@@ -481,6 +489,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 						SqlRowSet result = commonDao.executeQuery(query, emailTemplateQueryParams);
 
 						while (result.next()) {
+							ccIds.append(result.getObject(1) + ",");
 							paramMap.put(param.getEP_PARAM_NAME(), result.getObject(1));
 						}
 					} else if (param.getEP_PARAM_NAME().equals("bcc")) {
@@ -489,6 +498,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 						SqlRowSet result = commonDao.executeQuery(query, emailTemplateQueryParams);
 
 						while (result.next()) {
+							bccIds.append(result.getObject(1) + ",");
 							paramMap.put(param.getEP_PARAM_NAME(), result.getObject(1));
 						}
 					} else {
@@ -496,7 +506,6 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 						String query = queryMaster.getQM_QUERY();
 						SqlRowSet result = commonDao.executeQuery(query, emailTemplateQueryParams);
 						while (result.next()) {
-							System.out.println(result.getObject(1));
 							paramMap.put(param.getEP_PARAM_NAME(), result.getObject(1));
 						}
 					}
@@ -513,9 +522,10 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				}
 			}
 
+			
 			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(from));
-			if (inputObject.getToIds() != null || inputObject.getToIds().size() < 0) {
+			if (inputObject.getToIds() != null && inputObject.getToIds().size() > 0) {
 				for (String ids : inputObject.getToIds()) {
 					toIds.append(ids + ",");
 				}
@@ -553,10 +563,18 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			
 			Set<String> fileName = multiPartList.keySet();
 			
-
+			if(toIds.length() > 1) {
 			toIds.deleteCharAt(toIds.length() - 1);
+			}
+			
+			if(ccIds.length() > 1) {
 			ccIds.deleteCharAt(ccIds.length() - 1);
+			}
+			
+			if(bccIds.length() > 1) {
 			bccIds.deleteCharAt(bccIds.length() - 1);
+			}
+			
 
 			InternetAddress[] recipients = InternetAddress.parse(toIds.toString());
 			InternetAddress[] toRecipients = InternetAddress.parse(ccIds.toString());
@@ -588,6 +606,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			    String contentType = "application/octet-stream"; // Default content type
 			    // Adjust content type based on file extension if needed
 			    if (filename.endsWith(".pdf")) {
+			    	System.out.println("PDF");
 			        contentType = "application/pdf";
 			    } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
 			        contentType = "image/jpeg";
@@ -600,8 +619,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			    multipart.addBodyPart(attachmentPart);
 }
 			
+			if(attachments.toString().length() > 0) {
 			attachments.deleteCharAt(attachments.toString().length()-1);
-
+			}
 			message.setContent(multipart);
 
 			Transport.send(message);
@@ -636,6 +656,32 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			}
 		}
 		return emailTemplateQueryParams;
+	}
+
+	@Override
+	public String startAutoDispatch(String eventId) {
+		JSONObject response = new JSONObject();
+		AutoDispSetup autoDispatchDetails = autoDispSetupRepo.getByEventId(eventId);
+		System.out.println(autoDispatchDetails.getADS_ACTIVE_YN());
+		return response.toString();
+	}
+
+	@Override
+	public String getEmailQueries() {
+		JSONObject response = new JSONObject();
+		QUERY_MASTER query = commonDao.getQueryLov(75);
+		
+		if(query != null) {
+			List<LOVDTO> queryList = commonDao.executeLOVQuery(query.getQM_QUERY(), null);
+			
+			response.put(statusCode, successCode);
+			response.put(messageCode, "List Of Query Details Fetched Successfully");
+			response.put(dataCode, queryList);
+		}else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "Can't get query to get List of Email Queries");
+		}
+		return response.toString();
 	}
 
 }

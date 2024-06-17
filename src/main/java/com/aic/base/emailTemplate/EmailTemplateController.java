@@ -1,7 +1,6 @@
 package com.aic.base.emailTemplate;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.ws.rs.Path;
 
 @RestController
 @RequestMapping("/emailTemplate")
@@ -64,9 +62,19 @@ public class EmailTemplateController {
 		return emailTemplateService.getTemplateParam(request, screenCode, screenName, tranId);
 	}
 	
-	@PostMapping("/testMail")
+	@PostMapping("/sendMail")
 	public String sendMail(@RequestParam Integer templateId, @RequestBody EmailRequestModel object, HttpServletRequest request) {
 		return emailTemplateService.sendMail(templateId, object, request);
+	}
+	
+	@PostMapping("/autoDispatch")
+	public String AutoDispatch(@RequestParam String eventId) {
+		return emailTemplateService.startAutoDispatch(eventId);
+	}
+	
+	@GetMapping("/emailQueries")
+	public String emailQueries() {
+		return emailTemplateService.getEmailQueries();
 	}
 
 }
