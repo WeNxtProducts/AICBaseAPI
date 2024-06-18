@@ -1,4 +1,4 @@
-package com.aic.base.emailTemplate;
+package com.aic.base.AutoDispatch;
 import java.util.Date;
 
 import jakarta.persistence.Column;
@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -15,7 +16,8 @@ import jakarta.persistence.Table;
 public class AutoDispDocCond {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+  	@SequenceGenerator(name = "AutoDispatchDocCondSeq", sequenceName = "ADDC_SYS_ID_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "AutoDispatchDocCondSeq")
     @Column(name = "ADDC_SYS_ID")
     private Integer ADDC_SYS_ID;
 

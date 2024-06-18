@@ -67,11 +67,6 @@ public class EmailTemplateController {
 		return emailTemplateService.sendMail(templateId, object, request);
 	}
 	
-	@PostMapping("/autoDispatch")
-	public String AutoDispatch(@RequestParam String eventId) {
-		return emailTemplateService.startAutoDispatch(eventId);
-	}
-	
 	@GetMapping("/emailQueries")
 	public String emailQueries() {
 		return emailTemplateService.getEmailQueries();

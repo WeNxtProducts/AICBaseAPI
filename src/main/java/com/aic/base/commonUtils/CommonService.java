@@ -69,5 +69,11 @@ public interface CommonService {
 	public String docParamListEdit(HttpServletRequest request);
 
 	public String reportBuilderEdit(HttpServletRequest request);
+	
+	Object convertStringToObject(String value, Class<?> fieldType);
+	
+	Object dateConverter(String value);
+	
+	Object dateTimeConverter(String value);
 
 }

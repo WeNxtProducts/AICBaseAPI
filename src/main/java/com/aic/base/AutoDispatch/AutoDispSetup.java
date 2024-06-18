@@ -1,11 +1,14 @@
-package com.aic.base.emailTemplate;
+package com.aic.base.AutoDispatch;
 import java.util.Date;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 
 @Entity
@@ -13,34 +16,45 @@ import jakarta.persistence.Table;
 public class AutoDispSetup {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+  	@SequenceGenerator(name = "AutoDispatchSeq", sequenceName = "ADS_SYS_ID_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "AutoDispatchSeq")
+    @JsonProperty("ADS_SYS_ID")
     @Column(name = "ADS_SYS_ID")
     private Integer ADS_SYS_ID;
 
+    @JsonProperty("ADS_EVENT_ID")
     @Column(name = "ADS_EVENT_ID")
     private String ADS_EVENT_ID;
 
+    @JsonProperty("ADS_MODULE_ID")
     @Column(name = "ADS_MODULE_ID")
     private String ADS_MODULE_ID;
 
+    @JsonProperty("ADS_TYPE")
     @Column(name = "ADS_TYPE")
     private String ADS_TYPE;
 
+    @JsonProperty("ADS_DESC")
     @Column(name = "ADS_DESC")
     private String ADS_DESC;
 
+    @JsonProperty("ADS_ACTIVE_YN")
     @Column(name = "ADS_ACTIVE_YN")
     private String ADS_ACTIVE_YN;
 
+    @JsonProperty("ADS_EMAIL_TEMP_ID")
     @Column(name = "ADS_EMAIL_TEMP_ID")
     private String ADS_EMAIL_TEMP_ID;
 
+    @JsonProperty("ADS_DOC_YN")
     @Column(name = "ADS_DOC_YN")
     private String ADS_DOC_YN;
 
+    @JsonProperty("ADS_SMS_YN")
     @Column(name = "ADS_SMS_YN")
     private String ADS_SMS_YN;
 
+    @JsonProperty("ADS_WA_YN")
     @Column(name = "ADS_WA_YN")
     private String ADS_WA_YN;
 

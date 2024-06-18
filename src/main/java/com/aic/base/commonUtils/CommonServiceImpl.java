@@ -11,8 +11,14 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -1190,6 +1196,55 @@ public class CommonServiceImpl implements CommonService {
 		response.put(messageCode, "Report Builder Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
+	}
+
+	@Override
+	public Object convertStringToObject(String value, Class<?> fieldType) {
+		if (fieldType.equals(Integer.class) && value.isEmpty() == false && value != null) {
+			return Integer.parseInt(value);
+		} else if (fieldType.equals(Double.class) && value.isEmpty() == false && value != null) {
+			return Double.parseDouble(value);
+		} else if (fieldType.equals(Short.class) && value.isEmpty() == false && value != null) {
+			return Short.parseShort(value);
+		} else if (fieldType.equals(LocalDateTime.class) && value.isEmpty() == false && value != null) {
+			return dateTimeConverter(value);
+		} else if (fieldType.equals(Date.class) && value.isEmpty() == false && value != null) {
+			return dateConverter(value);
+		} else {
+			return value;
+		}
+	}
+
+	@Override
+	public Object dateConverter(String value) {
+		String dateStr = value;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = null;
+		try {
+			date = sdf.parse(dateStr);
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return date;
+	}
+
+	@Override
+	public Object dateTimeConverter(String value) {
+		String dateString = value;
+		if (value.length() > 10) {
+			dateString = value.substring(0, 10);
+		}
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+		LocalTime defaultTime = LocalTime.of(0, 0, 0);
+		LocalDate localDate = LocalDate.parse(dateString, formatter);
+		LocalDateTime dateTime = LocalDateTime.of(localDate, defaultTime);
+		String formattedDateTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+		DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+		LocalDateTime parsedDateTime = LocalDateTime.parse(formattedDateTime, formatters);
+		return parsedDateTime;
 	}
 
 }

@@ -26,6 +26,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.aic.base.AutoDispatch.AutoDispSetup;
+import com.aic.base.AutoDispatch.AutoDispSetupRepo;
 import com.aic.base.commonUtils.CommonDao;
 import com.aic.base.commonUtils.CommonService;
 import com.aic.base.commonUtils.LOVDTO;
@@ -138,7 +140,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 		try {
 			Field field = LJM_EMAIL_TEMPLATE.class.getDeclaredField(key);
 			Class<?> fieldType = field.getType();
-			Object convertedValue = convertStringToObject(value, fieldType);
+			Object convertedValue = commonServiceImpl.convertStringToObject(value, fieldType);
 			String setterMethodName = "set" + key;
 			if (value != null && !value.isEmpty()) {
 				Method setter = LJM_EMAIL_TEMPLATE.class.getMethod(setterMethodName, fieldType);
@@ -147,52 +149,6 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 		} catch (NoSuchFieldException e) {
 //			e.printStackTrace();
 		}
-	}
-
-	private Object convertStringToObject(String value, Class<?> fieldType) {
-		if (fieldType.equals(Integer.class) && value.isEmpty() == false && value != null) {
-			return Integer.parseInt(value);
-		} else if (fieldType.equals(Double.class) && value.isEmpty() == false && value != null) {
-			return Double.parseDouble(value);
-		} else if (fieldType.equals(Short.class) && value.isEmpty() == false && value != null) {
-			return Short.parseShort(value);
-		} else if (fieldType.equals(LocalDateTime.class) && value.isEmpty() == false && value != null) {
-			return dateTimeConverter(value);
-		} else if (fieldType.equals(Date.class) && value.isEmpty() == false && value != null) {
-			return dateConverter(value);
-		} else {
-			return value;
-		}
-	}
-
-	private Object dateConverter(String value) {
-		String dateStr = value;
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-		Date date = null;
-		try {
-			date = sdf.parse(dateStr);
-		} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		return date;
-	}
-
-	private Object dateTimeConverter(String value) {
-		String dateString = value;
-		if (value.length() > 10) {
-			dateString = value.substring(0, 10);
-		}
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-		LocalTime defaultTime = LocalTime.of(0, 0, 0);
-		LocalDate localDate = LocalDate.parse(dateString, formatter);
-		LocalDateTime dateTime = LocalDateTime.of(localDate, defaultTime);
-		String formattedDateTime = dateTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-
-		DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-		LocalDateTime parsedDateTime = LocalDateTime.parse(formattedDateTime, formatters);
-		return parsedDateTime;
 	}
 
 	@Override
@@ -327,7 +283,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			if(fieldType == LJM_EMAIL_TEMPLATE.class) {
 				convertedValue = getForeignObject(value);
 			}else {
-			convertedValue = convertStringToObject(value, fieldType);
+			convertedValue = commonServiceImpl.convertStringToObject(value, fieldType);
 			}
 			String setterMethodName = "set" + key;
 			if (value != null && !value.isEmpty()) {
@@ -662,8 +618,24 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	@Override
 	public String startAutoDispatch(String eventId) {
 		JSONObject response = new JSONObject();
-		AutoDispSetup autoDispatchDetails = autoDispSetupRepo.getByEventId(eventId);
-		System.out.println(autoDispatchDetails.getADS_ACTIVE_YN());
+
+		try {
+			if (!eventId.startsWith("EVNT_")) {
+				AutoDispSetup autoDispatchDetails = autoDispSetupRepo.getByEventId(eventId);
+				if(autoDispatchDetails.getADS_ACTIVE_YN().equals("Y")) {
+					
+				}else {
+					response.put(statusCode, successCode);
+					response.put(messageCode, "The Event is Not Active");
+				}
+			} else {
+				response.put(statusCode, successCode);
+				response.put(messageCode, "Please Enter the Correct Event Id");
+			}
+		} catch (Exception e) {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, e.getMessage());
+		}
 		return response.toString();
 	}
 

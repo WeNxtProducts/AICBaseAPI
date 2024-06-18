@@ -86,6 +86,8 @@ public class SecurityConfig {
 				.and() 
 				.authorizeHttpRequests().requestMatchers("/queryMaster/**").authenticated()
 				.and()
+				.authorizeHttpRequests().requestMatchers("/auto-dispatch/**").authenticated()
+				.and()
 				.sessionManagement() 
 				.sessionCreationPolicy(SessionCreationPolicy.STATELESS) 
 				.and() 
