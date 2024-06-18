@@ -52,9 +52,9 @@ public class CommonDaoImpl implements CommonDao {
 	}
 
 	@Override
-	public List<QUERY_PARAM_MASTER> getQueryParams(int sysId) {
+	public List<QueryParamMasterDTO> getQueryParams(int sysId) {
 		String sql = "SELECT * FROM LJM_QUERY_PARAM_MASTER WHERE QPM_QM_SYS_ID = ? order by QPM_PARAM_TYPE desc";
-		List<QUERY_PARAM_MASTER> result = template.query(sql, new Object[] {sysId}, new BeanPropertyRowMapper<>(QUERY_PARAM_MASTER.class));
+		List<QueryParamMasterDTO> result = template.query(sql, new Object[] {sysId}, new BeanPropertyRowMapper<>(QueryParamMasterDTO.class));
 		return result;
 	}
 

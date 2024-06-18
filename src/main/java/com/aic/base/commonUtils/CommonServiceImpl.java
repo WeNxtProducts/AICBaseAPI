@@ -298,7 +298,7 @@ public class CommonServiceImpl implements CommonService {
 				 * getting parameters for the query if it is of type paramlov and processing it
 				 * to a map
 				 */
-				List<QUERY_PARAM_MASTER> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
+				List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
 				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
 				paramsMap.remove("queryId");
 				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
@@ -312,11 +312,11 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	}
 
-	private Map<String, Object> processParamLOV(List<QUERY_PARAM_MASTER> queryParams, HttpServletRequest request) {
+	private Map<String, Object> processParamLOV(List<QueryParamMasterDTO> queryParams, HttpServletRequest request) {
 		Map<String, Object> parameters = new HashMap<>();
 		Map<String, Object> parameteres = new HashMap<>();
 		if (queryParams != null) {
-			for (QUERY_PARAM_MASTER params : queryParams) {
+			for (QueryParamMasterDTO params : queryParams) {
 				if (params.getQPM_PARAM_TYPE().equals("S")) {
 					parameters.put(params.getQPM_PARAM_NAME(), params.getQPM_PARAM_VALUE());
 				} else if (params.getQPM_PARAM_TYPE().equals("P")) {
@@ -370,7 +370,7 @@ public class CommonServiceImpl implements CommonService {
 				response.put(statusCode, successCode);
 				response.put(dataCode, queryResult);
 			} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
-				List<QUERY_PARAM_MASTER> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
+				List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
 				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
 				paramsMap.remove("queryId");
 				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
@@ -475,11 +475,11 @@ public class CommonServiceImpl implements CommonService {
 		int queryId = Integer.parseInt(((String) parames.get("queryId")));
 		parames.remove("queryId");
 		QUERY_MASTER query = commonDao.getQueryLov(queryId);
-		List<QUERY_PARAM_MASTER> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
+		List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
 		Map<String, Object> parameters = new HashMap<>();
 
 		Map<String, Object> parameterss = processParamLOV(null, request);
-		for (QUERY_PARAM_MASTER params : queryParams) {
+		for (QueryParamMasterDTO params : queryParams) {
 			if (params.getQPM_PARAM_TYPE().equals("S")) {
 				parameters.put(params.getQPM_PARAM_NAME(), params.getQPM_PARAM_VALUE());
 			} else if (params.getQPM_PARAM_TYPE().equals("P")) {

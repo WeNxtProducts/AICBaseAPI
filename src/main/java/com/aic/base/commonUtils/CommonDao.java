@@ -17,7 +17,7 @@ public interface CommonDao {
 	
 	QUERY_MASTER getQueryLov(int queryId);
 	
-	List<QUERY_PARAM_MASTER> getQueryParams(int sysId);
+	List<QueryParamMasterDTO> getQueryParams(int sysId);
 	
 	List<LOVDTO> executeLOVQuery(String query, Map<String, Object> paramList);
 	

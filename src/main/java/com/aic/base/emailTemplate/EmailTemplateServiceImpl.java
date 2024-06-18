@@ -31,6 +31,7 @@ import com.aic.base.commonUtils.CommonService;
 import com.aic.base.commonUtils.LOVDTO;
 import com.aic.base.commonUtils.QUERY_MASTER;
 import com.aic.base.commonUtils.QUERY_PARAM_MASTER;
+import com.aic.base.commonUtils.QueryParamMasterDTO;
 import com.aic.base.logging.EmailLogsDTO;
 import com.aic.base.logging.LoggerFunctionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -472,7 +473,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 						paramMap.put(param.getEP_PARAM_NAME(), param.getEP_VALUE());
 					}
 				} else if (param.getEP_TYPE().equals("Q")) {
-					List<QUERY_PARAM_MASTER> queryParams = commonDao.getQueryParams(Integer.parseInt(param.getEP_VALUE()));
+					List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(Integer.parseInt(param.getEP_VALUE()));
 					Map<String, Object> emailTemplateQueryParams = processEmailTemplateParams(queryParams, inputObject.getContent());
 					if (param.getEP_PARAM_NAME().equals("to")) {
 						QUERY_MASTER queryMaster = commonDao.getQueryLov(Integer.parseInt(param.getEP_VALUE()));
@@ -648,9 +649,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 		return response.toString();
 	}
 
-	private Map<String, Object> processEmailTemplateParams(List<QUERY_PARAM_MASTER> queryParams, Map<String, Object> map) {
+	private Map<String, Object> processEmailTemplateParams(List<QueryParamMasterDTO> queryParams, Map<String, Object> map) {
 		Map<String, Object> emailTemplateQueryParams = new HashMap<>();
-		for(QUERY_PARAM_MASTER param : queryParams) {
+		for(QueryParamMasterDTO param : queryParams) {
 			if(map.get(param.getQPM_PARAM_NAME()) != null) {
 			emailTemplateQueryParams.put(param.getQPM_PARAM_NAME(), map.get(param.getQPM_PARAM_NAME()));
 			}
