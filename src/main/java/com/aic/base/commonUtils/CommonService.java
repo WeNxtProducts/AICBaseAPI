@@ -78,4 +78,7 @@ public interface CommonService {
 
 	public String getMapQuery(Integer queryId, QueryParametersDTO queryParams);
 
+	public String claimDocToDoListEdit(String screenCode, String screenName, Integer tranId,
+			HttpServletRequest request);
+
 }

@@ -191,6 +191,17 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	
+	@GetMapping("/claimsDocToDoListEdit")
+	public String claimDocToDoListEdit(@RequestParam String screenCode, @RequestParam String screenName, @RequestParam Integer tranId, HttpServletRequest request) {
+		try {
+			return service.claimDocToDoListEdit(screenCode, screenName, tranId, request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
 	@GetMapping("/docPrintListEdit")
 	public String docPrintListEdit(HttpServletRequest request) {
 		try {
