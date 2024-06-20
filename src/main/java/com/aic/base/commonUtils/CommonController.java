@@ -162,9 +162,10 @@ public class CommonController {
 	}
 	
 	@GetMapping("/claimsBeneficiaryEdit")
-	public String claimBeneficiaryEdit(HttpServletRequest request) {
+	public String claimBeneficiaryEdit(@RequestParam String screenCode, @RequestParam String screenName, @RequestParam Integer tranId, HttpServletRequest request) {
 		try {
-			return service.claimBeneficiaryEdit(request);
+	
+			return service.claimBeneficiaryEdit(screenCode, screenName, tranId, request);
 			}catch(Exception e) {
 				e.printStackTrace();
 				return e.getMessage();

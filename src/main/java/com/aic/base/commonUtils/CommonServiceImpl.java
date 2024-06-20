@@ -962,27 +962,27 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	}
 
-	@Override
-	public String claimBeneficiaryEdit(HttpServletRequest request) {
-		JSONObject response = new JSONObject();
-		String authorizationHeader = request.getHeader("Authorization");
-		String token = authorizationHeader.substring(7).trim();
-		Map<String, Object> params = processParamLOV(null, request);
-		String url = baseCrudPath + "claimBfcry/getltclaimBfcryByid?cben_pben_TRAN_id=" + params.get("tranId");
-		HttpHeaders headers = new HttpHeaders();
-		RestTemplate restTemplate = new RestTemplate();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + token);
-		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
-		JSONObject object = new JSONObject(responseEntity.getBody());
-
-		JSONObject obj = new JSONObject(newEditTabs(request, object));
-		response.put(statusCode, successCode);
-		response.put(messageCode, "Claim Beneficiary Details Fetched Successfully");
-		response.put(dataCode, obj);
-		return response.toString();
-	}
+//	@Override
+//	public String claimBeneficiaryEdit(HttpServletRequest request) {
+//		JSONObject response = new JSONObject();
+//		String authorizationHeader = request.getHeader("Authorization");
+//		String token = authorizationHeader.substring(7).trim();
+//		Map<String, Object> params = processParamLOV(null, request);
+//		String url = baseCrudPath + "claimBfcry/getltclaimBfcryByid?cben_pben_TRAN_id=" + params.get("tranId");
+//		HttpHeaders headers = new HttpHeaders();
+//		RestTemplate restTemplate = new RestTemplate();
+//		headers.setContentType(MediaType.APPLICATION_JSON);
+//		headers.set("Authorization", "Bearer " + token);
+//		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+//		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+//		JSONObject object = new JSONObject(responseEntity.getBody());
+//
+//		JSONObject obj = new JSONObject(newEditTabs(request, object));
+//		response.put(statusCode, successCode);
+//		response.put(messageCode, "Claim Beneficiary Details Fetched Successfully");
+//		response.put(dataCode, obj);
+//		return response.toString();
+//	}
 
 	@Override
 	public String claimChargesEdit(HttpServletRequest request) {
@@ -1006,6 +1006,8 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	}
 
+	
+	
 	@Override
 	public String claimCheckListEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1282,5 +1284,30 @@ public class CommonServiceImpl implements CommonService {
 		}
 		return response.toString();
 	}
+
+	
+	
+	@Override
+	public String claimBeneficiaryEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "claimBfcry/getltclaimBfcryByid?cben_pben_TRAN_id=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Claim estimate Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+	
 
 }

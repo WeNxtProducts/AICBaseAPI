@@ -52,7 +52,7 @@ public interface CommonService {
 	
 	public String elasticSearch(String document, HttpServletRequest request);
 
-	public String claimBeneficiaryEdit(HttpServletRequest request);
+	public String claimBeneficiaryEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request);
 
 	public String claimChargesEdit(HttpServletRequest request);
 
