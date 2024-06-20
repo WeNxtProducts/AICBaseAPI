@@ -878,7 +878,7 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public String claimEstimateEdit(HttpServletRequest request) {
+	public String claimEstimateEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request) {
 		JSONObject response = new JSONObject();
 		String authorizationHeader = request.getHeader("Authorization");
 		String token = authorizationHeader.substring(7).trim();
@@ -1103,9 +1103,9 @@ public class CommonServiceImpl implements CommonService {
 					int parameterType = resultSet.getInt("COLUMN_TYPE");
 
 					if (parameterType == 1) {
-						System.out.println("IN Parameter: " + parameterName);
+//						System.out.println("IN Parameter: " + parameterName);
 					} else if (parameterType == 4) {
-						System.out.println("OUT Parameter: " + parameterName);
+//						System.out.println("OUT Parameter: " + parameterName);
 					}
 				}
 				boolean successFlag = true;
@@ -1245,6 +1245,42 @@ public class CommonServiceImpl implements CommonService {
 		DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		LocalDateTime parsedDateTime = LocalDateTime.parse(formattedDateTime, formatters);
 		return parsedDateTime;
+	}
+
+	@Override
+	public String getMapQuery(Integer queryId, QueryParametersDTO queryParams) {
+		JSONObject response = new JSONObject();
+		try {
+			QUERY_MASTER query = commonDao.getQueryLov(queryId);
+			if (query != null) {
+				List<Map<String, Object>> result = commonDao.getMapQuery(query.getQM_QUERY(),
+						queryParams.getQueryParameters());
+
+				List<Map<String, Object>> finalResult = new ArrayList<>();
+				if (!result.isEmpty()) {
+					for (int i = 0; i < result.size(); i++) {
+						Map<String, Object> resultMap = result.get(i);
+						finalResult.add(resultMap);
+					}
+				} else {
+					return null;
+				}
+				
+				response.put(statusCode, successCode);
+				response.put(messageCode, "Data Fetched Successfully");
+				
+				if(finalResult.size() == 1) {
+					response.put(dataCode, finalResult.get(0));
+				}else {
+					response.put(dataCode, finalResult);
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.put(statusCode, errorCode);
+			response.put(messageCode, e.getMessage());
+		}
+		return response.toString();
 	}
 
 }

@@ -47,4 +47,6 @@ public interface CommonDao {
 
 	SqlRowSet executeQuery(String query, Map<String, Object> emailTemplateQueryParams);
 
+	List<Map<String, Object>> getMapQuery(String string, Map<String, Object> map);
+
 }

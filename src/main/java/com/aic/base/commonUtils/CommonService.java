@@ -48,7 +48,7 @@ public interface CommonService {
 
 	public String claimsEdit(HttpServletRequest request);
 
-	public String claimEstimateEdit(HttpServletRequest request);
+	public String claimEstimateEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request);
 	
 	public String elasticSearch(String document, HttpServletRequest request);
 
@@ -75,5 +75,7 @@ public interface CommonService {
 	Object dateConverter(String value);
 	
 	Object dateTimeConverter(String value);
+
+	public String getMapQuery(Integer queryId, QueryParametersDTO queryParams);
 
 }

@@ -214,7 +214,11 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 		JSONObject response = new JSONObject();
 		try {
 			AutoDispSetup existingAD = autoDispSetupRepo.getById(tranId);
-			if (existingAD != null) {
+			 List<AutoDispDocCond> existingTemplateList = autoDispDocCondRepo.getExisitingTemplates(tranId);
+			 if(existingTemplateList.size() > 0 && existingAD != null) {
+				 response.put(statusCode, errorCode);
+				 response.put(messageCode, "Cannot Delete When Documents are Mapped for Auto Dispatch");
+			} else if (existingAD != null) {
 				System.out.println("IN");
 				autoDispSetupRepo.deleteById(tranId);
 

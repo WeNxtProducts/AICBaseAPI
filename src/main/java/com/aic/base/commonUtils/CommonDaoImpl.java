@@ -159,6 +159,15 @@ public class CommonDaoImpl implements CommonDao {
         SqlRowSet result = namedTemplate.queryForRowSet(query, emailTemplateQueryParams);
         return result;
     }
+
+	@Override
+	public List<Map<String, Object>> getMapQuery(String query, Map<String, Object> queryParams) {
+		String sql = query;
+
+		List<Map<String, Object>> rows = namedTemplate.queryForList(sql, queryParams);
+
+		return rows;
+	}
 	
 	
 

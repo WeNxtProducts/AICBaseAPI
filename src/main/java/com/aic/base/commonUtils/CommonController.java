@@ -152,9 +152,9 @@ public class CommonController {
 	}
 	
 	@GetMapping("/claimsEstimatEdit")
-	public String claimEstimateEdit(HttpServletRequest request) {
+	public String claimEstimateEdit(@RequestParam String screenCode, @RequestParam String screenName, @RequestParam Integer tranId, HttpServletRequest request) {
 		try {
-			return service.claimEstimateEdit(request);
+			return service.claimEstimateEdit(screenCode, screenName, tranId, request);
 			}catch(Exception e) {
 				e.printStackTrace();
 				return e.getMessage();
@@ -236,6 +236,11 @@ public class CommonController {
 			e.printStackTrace();
 			return e.getMessage();
 		}
+	}
+	
+	@GetMapping("/getMapQuery")
+	public String getMapQuery(@RequestParam Integer queryId, @RequestBody QueryParametersDTO queryParams) {
+		return service.getMapQuery(queryId, queryParams);
 	}
 
 }
