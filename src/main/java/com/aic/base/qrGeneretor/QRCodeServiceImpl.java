@@ -1,6 +1,7 @@
 package com.aic.base.qrGeneretor;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,27 @@ import java.util.Map;
 
 @Service
 public class QRCodeServiceImpl implements QRCodeService {
+	
+	@Value("${spring.success.code}")
+	private String successCode;
+
+	@Value("${spring.error.code}")
+	private String errorCode;
+
+	@Value("${spring.warning.code}")
+	private String warningCode;
+
+	@Value("${spring.message.code}")
+	private String messageCode;
+
+	@Value("${spring.status.code}")
+	private String statusCode;
+
+	@Value("${spring.data.code}")
+	private String dataCode;
+
+	@Value("${spring.data.filepath}")
+	private String locationCode;
 
 	private static final String BASE_PATH = "D:/QRGenerator/";
 	private static final String SEQUENCE_NAME = "QR_CODE_SEQ";
@@ -91,9 +113,12 @@ public class QRCodeServiceImpl implements QRCodeService {
 
 		// Create JSON response
 		JSONObject response = new JSONObject();
-		response.put("statusCode", "200");
-		response.put("message", "QR code generated successfully");
-		response.put("filePath", filePath);
+		JSONObject data = new JSONObject();
+		
+		response.put(statusCode, successCode);
+		response.put(messageCode, "QR code generated successfully");
+		data.put(locationCode, filePath);
+		response.put(dataCode, data);
 
 		HttpHeaders headers = new HttpHeaders();
 		headers.setContentType(MediaType.APPLICATION_JSON);
