@@ -66,6 +66,9 @@ public class SecurityConfig {
 				.requestMatchers("/emailTemplate/**").permitAll()
 				.and()
 				.authorizeHttpRequests()
+				.requestMatchers("/qr-code/**").permitAll()
+				.and()
+				.authorizeHttpRequests()
 				.requestMatchers("/common/insertException").permitAll()
 				.and()
 

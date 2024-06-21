@@ -16,6 +16,14 @@
 	<properties>
 		<java.version>17</java.version>
 	</properties>
+	
+	<repositories>
+    <repository>
+        <id>com.e-iceblue</id>
+        <name>e-iceblue</name>
+        <url>https://repo.e-iceblue.com/nexus/content/groups/public/</url>
+    </repository>
+</repositories>
 	<dependencies>
 		
 		<dependency>
@@ -219,6 +227,13 @@
     		<version>1.6.2</version>
 		</dependency>		
 
+		<!-- QR GENERATOR -->
+
+<dependency>
+        <groupId>e-iceblue</groupId>
+        <artifactId>spire.barcode.free</artifactId>
+        <version>5.1.1</version>
+    </dependency>
 	</dependencies>
 
 	<build>
