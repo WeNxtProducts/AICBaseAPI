@@ -8,6 +8,8 @@ public class FormFieldsDTO {
 	
 	@JsonProperty("formFields")
 	private Map<String, Object> formFields;
+	
+	@JsonProperty("label")
 	private String label;
 
 	// Getters and setters

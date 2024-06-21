@@ -1,5 +1,6 @@
 package com.aic.base.AutoDispatch;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -48,6 +49,11 @@ public class AutoDispatchController {
 	@PostMapping("/deleteAutoDispDetails/{tranId}")
 	public String deleteAutoDispDetails(@PathVariable Integer tranId) {
 		return autoDispatchService.deleteAutoDispDetails(tranId);
+	}
+	
+	@PostMapping("/triggerAutoDispatch")
+	public String triggerSyncAutoAutoDispatch(@RequestBody AutoDispatchDTO autoDispatchDTO, HttpServletRequest request) {
+		return autoDispatchService.triggerSyncAutoDispatch(autoDispatchDTO, request);
 	}
 
 }

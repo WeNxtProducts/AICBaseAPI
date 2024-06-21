@@ -1,5 +1,7 @@
 package com.aic.base.AutoDispatch;
 
+import org.json.JSONObject;
+
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface AutoDispatchService {
@@ -11,5 +13,7 @@ public interface AutoDispatchService {
 	String updateAutoDispDetails(AutoDispatchRequest autoDispRequest, Integer tranId);
 
 	String deleteAutoDispDetails(Integer tranId);
+
+	String triggerSyncAutoDispatch(AutoDispatchDTO autoDispatchDTO, HttpServletRequest request);
 
 }
