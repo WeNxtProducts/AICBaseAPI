@@ -1256,18 +1256,20 @@ public class CommonServiceImpl implements CommonService {
 						Map<String, Object> resultMap = result.get(i);
 						finalResult.add(resultMap);
 					}
+					response.put(statusCode, successCode);
+					response.put(messageCode, "Data Fetched Successfully");
+
+					if (finalResult.size() == 1) {
+						response.put(dataCode, finalResult.get(0));
+					} else {
+						response.put(dataCode, finalResult);
+					}
 				} else {
-					return null;
+					response.put(statusCode, successCode);
+					response.put(messageCode,
+							"No Datas Found For Policy No: " + queryParams.getQueryParameters().get("CLM_POL_NO"));
 				}
-				
-				response.put(statusCode, successCode);
-				response.put(messageCode, "Data Fetched Successfully");
-				
-				if(finalResult.size() == 1) {
-					response.put(dataCode, finalResult.get(0));
-				}else {
-					response.put(dataCode, finalResult);
-				}
+
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
