@@ -8,6 +8,7 @@ public class AutoDispatchDTO {
 	
 	private String eventId;
 	
+	@JsonProperty("docParams")
 	private List<FormFieldsDTO> docParams;
 	
 	@JsonProperty("emailParams")

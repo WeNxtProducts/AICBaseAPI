@@ -276,35 +276,43 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 					AutoDispSetup autoDispatchDetails = autoDispSetupRepo.getByEventId(autoDispatchDTO.getEventId());
 					if (autoDispatchDetails != null) {
 						if (autoDispatchDetails.getADS_ACTIVE_YN().equals("Y")) {
+							StringBuilder attachmentProcessMessage = new StringBuilder();
+							attachmentProcessMessage.append("The Documents ");
 							if (autoDispatchDetails.getADS_DOC_YN().equals("Y")) {
-								List<AutoDispDocCond> autoDispDocCondDetails = autoDispDocCondRepo.
-										getExisitingTemplates(autoDispatchDetails.getADS_SYS_ID());
-								if(autoDispDocCondDetails.size() > 0) {
+								List<AutoDispDocCond> autoDispDocCondDetails = autoDispDocCondRepo
+										.getExisitingTemplates(autoDispatchDetails.getADS_SYS_ID());
+								if (autoDispDocCondDetails.size() > 0) {
 									EmailRequestModel emailRequest = new EmailRequestModel();
 									List<String> toIdsList = new ArrayList<>();
-								    List<?> toIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields().get("toIds");
-								    for (Object obj : toIds) {
-								        toIdsList.add(obj.toString());
-								    }
+									List<?> toIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields()
+											.get("toIds");
+									for (Object obj : toIds) {
+										toIdsList.add(obj.toString());
+									}
 									List<String> ccIdsList = new ArrayList<>();
-								    List<?> ccIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields().get("ccIds");
-								    for (Object obj : ccIds) {
-								        ccIdsList.add(obj.toString());
-								    }
-								    emailRequest.setCcIds(ccIdsList);
+									List<?> ccIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields()
+											.get("ccIds");
+									for (Object obj : ccIds) {
+										ccIdsList.add(obj.toString());
+									}
+									emailRequest.setCcIds(ccIdsList);
 									List<String> bccIdsList = new ArrayList<>();
-								    List<?> bccIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields().get("bccIds");
-								    for (Object obj : bccIds) {
-								        bccIdsList.add(obj.toString());
-								    }
-								    emailRequest.setBccIds(bccIdsList);
-								    emailRequest.setSubject(autoDispatchDTO.getEmailParams().getFormFields().get("subject").toString());
-								    Map<String, byte[]> attachment = new HashMap<String, byte[]>();
-								    int j = 0;
-									for(AutoDispDocCond autoDispDocCondDetail : autoDispDocCondDetails) {
+									List<?> bccIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields()
+											.get("bccIds");
+									for (Object obj : bccIds) {
+										bccIdsList.add(obj.toString());
+									}
+									emailRequest.setBccIds(bccIdsList);
+									emailRequest.setSubject(
+											autoDispatchDTO.getEmailParams().getFormFields().get("subject").toString());
+									Map<String, byte[]> attachment = new HashMap<String, byte[]>();
+									int j = 0;
+									for (AutoDispDocCond autoDispDocCondDetail : autoDispDocCondDetails) {
 										DocumentRequestDTO docRequestDTO = new DocumentRequestDTO();
-										docRequestDTO.setDocTemplateName(autoDispatchDTO.getDocParams().get(j).getLabel());
-										docRequestDTO.setDocParams(autoDispatchDTO.getDocParams().get(j).getFormFields());
+										docRequestDTO
+												.setDocTemplateName(autoDispatchDTO.getDocParams().get(j).getLabel());
+										docRequestDTO
+												.setDocParams(autoDispatchDTO.getDocParams().get(j).getFormFields());
 										String authorizationHeader = request.getHeader("Authorization");
 										String token = authorizationHeader.substring(7).trim();
 										String url = docPrintPath + "report/generatedocument";
@@ -312,38 +320,46 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 										RestTemplate restTemplate = new RestTemplate();
 										headers.setContentType(MediaType.APPLICATION_JSON);
 										headers.set("Authorization", "Bearer " + token);
-										HttpEntity<DocumentRequestDTO> requestEntity = new HttpEntity<>(docRequestDTO, headers);
-										ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+										HttpEntity<DocumentRequestDTO> requestEntity = new HttpEntity<>(docRequestDTO,
+												headers);
+										ResponseEntity<String> responseEntity = restTemplate.postForEntity(url,
+												requestEntity, String.class);
 										JSONObject result = new JSONObject(responseEntity.getBody());
 										JSONObject attachemntData = new JSONObject(result.get("Data").toString());
-										
+
 										JSONArray attachmentArray = attachemntData.getJSONArray("attachment");
 										ObjectMapper objectMapper = new ObjectMapper();
 										byte[] bytes = new byte[attachmentArray.length()];
 
-								        byte[] byteArray = new byte[attachmentArray.length()];
+										byte[] byteArray = new byte[attachmentArray.length()];
 
-								        // Iterate through the JSONArray and convert each integer to byte
-								        for (int i = 0; i < attachmentArray.length(); i++) {
-								            byteArray[i] = (byte) attachmentArray.getInt(i);
-								        }
-								        
+										// Iterate through the JSONArray and convert each integer to byte
+										for (int i = 0; i < attachmentArray.length(); i++) {
+											byteArray[i] = (byte) attachmentArray.getInt(i);
+										}
 										attachment.put(autoDispDocCondDetail.getADDC_TEMP_NAME(), byteArray);
 										j++;
+										attachmentProcessMessage.append(autoDispDocCondDetail.getADDC_TEMP_NAME() + ", ");
 									}
-								    Map<?, ?> map = (Map<?, ?>) autoDispatchDTO.getEmailParams().getFormFields().get("content");
+									
+									attachmentProcessMessage.deleteCharAt(attachmentProcessMessage.length()-2);
+									attachmentProcessMessage.append(" are Processed");
+									Map<?, ?> map = (Map<?, ?>) autoDispatchDTO.getEmailParams().getFormFields()
+											.get("content");
 
-								    Map<String, Object> contentMap = new HashMap<>();
-								    for (Map.Entry<?, ?> entry : map.entrySet()) {
-								        
-								        contentMap.put(entry.getKey().toString(), entry.getValue());
-								        // Perform other operations with key and value as needed
-								    }
+									Map<String, Object> contentMap = new HashMap<>();
+									for (Map.Entry<?, ?> entry : map.entrySet()) {
+										contentMap.put(entry.getKey().toString(), entry.getValue());
+									}
 									emailRequest.setContent(contentMap);
 									emailRequest.setAttachments(attachment);
-									emailTemplateService.sendMail(Integer.parseInt(autoDispatchDetails.getADS_EMAIL_TEMP_ID()), emailRequest, request);
+									emailTemplateService.sendMail(
+											Integer.parseInt(autoDispatchDetails.getADS_EMAIL_TEMP_ID()), emailRequest,
+											request);
 								}
 							}
+							response.put(statusCode, successCode);
+							response.put(messageCode, attachmentProcessMessage.toString());
 						}
 					} else {
 						response.put(statusCode, errorCode);

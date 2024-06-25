@@ -589,7 +589,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			logs.setTemplateName(emailTemplate.getET_TEMP_NAME());
 			logs.setTemplateBody(con);
 			logs.setGenDate(LocalDateTime.now());
-			
+			logs.setAttachments(attachments.toString()); 
 			loggingService.logToEmailHistoryLogs(logs, request);
 			response.put(statusCode, successCode);
 			response.put(messageCode, "Mail Sent Successfully");

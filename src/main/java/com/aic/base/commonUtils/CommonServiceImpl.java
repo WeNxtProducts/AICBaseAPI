@@ -286,10 +286,6 @@ public class CommonServiceImpl implements CommonService {
 	@Override
 	public String getQueryLOV(HttpServletRequest request) {
 		Map<String, Object> params = processParamLOV(null, request);
-		/*
-		 * Getting query Id From the query string in a variable and removing it from
-		 * params map
-		 */
 		int queryId = Integer.parseInt(((String) params.get("queryId")));
 		params.remove("queryId");
 		JSONObject response = new JSONObject();
@@ -300,10 +296,6 @@ public class CommonServiceImpl implements CommonService {
 				response.put(statusCode, successCode);
 				response.put(dataCode, queryResult);
 			} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
-				/*
-				 * getting parameters for the query if it is of type paramlov and processing it
-				 * to a map
-				 */
 				List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
 				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
 				paramsMap.remove("queryId");

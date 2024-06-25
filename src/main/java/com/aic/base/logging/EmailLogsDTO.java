@@ -14,6 +14,8 @@ public class EmailLogsDTO {
 	
 	private String hostName;
 	
+	private String attachments;
+	
 	private String ipAddress;
 
 	public String getTo() {
@@ -54,6 +56,14 @@ public class EmailLogsDTO {
 
 	public void setHostName(String hostName) {
 		this.hostName = hostName;
+	}
+
+	public String getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(String attachments) {
+		this.attachments = attachments;
 	}
 
 	public String getIpAddress() {

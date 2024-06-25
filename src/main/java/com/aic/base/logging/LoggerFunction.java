@@ -34,6 +34,7 @@ public class LoggerFunction implements LoggerFunctionService{
 		MDC.put("EMHI_TEMPLATE_BODY", escapedContent);
 		MDC.put("EMHI_GEN_DATE", logs.getGenDate());
 		MDC.put("EMHI_HOST_NAME", hostname);
+		MDC.put("EMHI_ATTACHMENTS", logs.getAttachments());
 		MDC.put("EMHI_IP_ADDR", ipAddress.toString());
 		ljmLogger.info("Email History Log");
 		MDC.clear();
