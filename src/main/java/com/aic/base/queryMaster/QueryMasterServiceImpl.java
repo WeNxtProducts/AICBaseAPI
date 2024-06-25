@@ -102,7 +102,7 @@ public class QueryMasterServiceImpl implements QueryMasterServcie {
 			Class<?> fieldType = field.getType();
 			Object convertedValue = convertStringToObject(value, fieldType);
 			String setterMethodName = "set" + key;
-			System.out.println(setterMethodName);
+		
 			if (value != null && !value.isEmpty()) {
 				Method setter = QUERY_MASTER.class.getMethod(setterMethodName, fieldType);
 				setter.invoke(queryDetails, convertedValue);
@@ -221,7 +221,7 @@ public class QueryMasterServiceImpl implements QueryMasterServcie {
 				response.put(messageCode, "Query Details Fetched Successfully");
 				 ObjectMapper mapper = new ObjectMapper();
 				  Map<String, Object> templateData = mapper.convertValue(queryDetails, Map.class);
-				  System.out.println(templateData);  
+				   
 				  JSONObject getObject = new JSONObject(templateData);
 				  
 				  result = commonServiceImpl.newEditTabs(request, getObject);
@@ -280,7 +280,7 @@ public class QueryMasterServiceImpl implements QueryMasterServcie {
 	}
 
 	private void setQueryParamField(QUERY_PARAM_MASTER queryParam, String key, String value) throws Exception{
-		System.out.println(key);
+		
 		try {
 			Field field = QUERY_PARAM_MASTER.class.getDeclaredField(key);
 			Class<?> fieldType = field.getType();

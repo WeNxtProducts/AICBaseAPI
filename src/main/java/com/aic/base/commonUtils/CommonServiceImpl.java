@@ -1105,9 +1105,9 @@ public class CommonServiceImpl implements CommonService {
 					int parameterType = resultSet.getInt("COLUMN_TYPE");
 
 					if (parameterType == 1) {
-//						System.out.println("IN Parameter: " + parameterName);
+
 					} else if (parameterType == 4) {
-//						System.out.println("OUT Parameter: " + parameterName);
+
 					}
 				}
 				boolean successFlag = true;
@@ -1184,7 +1184,7 @@ public class CommonServiceImpl implements CommonService {
 		String token = authorizationHeader.substring(7).trim();
 		Map<String, Object> params = processParamLOV(null, request);
 		String url = baseDocPath + "reportBuilder/getRB?rbSysId=" + params.get("tranId");
-		System.out.println(url);
+	
 		HttpHeaders headers = new HttpHeaders();
 		RestTemplate restTemplate = new RestTemplate();
 		headers.setContentType(MediaType.APPLICATION_JSON);

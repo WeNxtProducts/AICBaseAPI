@@ -250,7 +250,7 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 				 response.put(statusCode, errorCode);
 				 response.put(messageCode, "Cannot Delete When Documents are Mapped for Auto Dispatch");
 			} else if (existingAD != null) {
-				System.out.println("IN");
+				
 				autoDispSetupRepo.deleteById(tranId);
 
 				response.put(statusCode, successCode);
@@ -327,7 +327,7 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 								        for (int i = 0; i < attachmentArray.length(); i++) {
 								            byteArray[i] = (byte) attachmentArray.getInt(i);
 								        }
-								        System.out.println(autoDispDocCondDetail.getADDC_TEMP_NAME());
+								        
 										attachment.put(autoDispDocCondDetail.getADDC_TEMP_NAME(), byteArray);
 										j++;
 									}
@@ -335,7 +335,7 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 
 								    Map<String, Object> contentMap = new HashMap<>();
 								    for (Map.Entry<?, ?> entry : map.entrySet()) {
-								        System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
+								        
 								        contentMap.put(entry.getKey().toString(), entry.getValue());
 								        // Perform other operations with key and value as needed
 								    }

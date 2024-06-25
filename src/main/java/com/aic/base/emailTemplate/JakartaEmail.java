@@ -60,7 +60,7 @@ public class JakartaEmail {
 //
 //		javaMailSender.send(message);
 ////    Transport.send(message);
-//    System.out.println("Email Message Sent Successfully");
+
 //      } catch (MessagingException e) {
 //         throw new RuntimeException(e);
 //      }

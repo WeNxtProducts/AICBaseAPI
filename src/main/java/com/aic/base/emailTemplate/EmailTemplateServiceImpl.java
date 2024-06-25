@@ -507,10 +507,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				Set<String> keys = inputObject.getAttachments().keySet();
 				for (String key : keys) {
 					
-//					byte[] byteArray = Base64.getDecoder().decode(inputObject.getAttachments().get(key));
-//					for(int i=0; i<byteArray.length; i++) {
-//						System.out.println(byteArray[i]);
-//					}
+
 					attachments.append(key + ",");
 					BASE64DecodedMultipartFile conv = new BASE64DecodedMultipartFile(
 							inputObject.getAttachments().get(key));
@@ -563,7 +560,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			    String contentType = "application/octet-stream"; // Default content type
 			    // Adjust content type based on file extension if needed
 			    if (filename.endsWith(".pdf")) {
-			    	System.out.println("PDF");
+			    
 			        contentType = "application/pdf";
 			    } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
 			        contentType = "image/jpeg";
