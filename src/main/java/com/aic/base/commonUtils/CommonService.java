@@ -81,4 +81,6 @@ public interface CommonService {
 	public String claimDocToDoListEdit(String screenCode, String screenName, Integer tranId,
 			HttpServletRequest request);
 
+	public String claimsHistoryEdit(HttpServletRequest request);
+
 }

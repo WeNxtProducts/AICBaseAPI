@@ -254,5 +254,15 @@ public class CommonController {
 	public String getMapQuery(@RequestParam Integer queryId, @RequestBody QueryParametersDTO queryParams) {
 		return service.getMapQuery(queryId, queryParams);
 	}
+	
+	@GetMapping("/claimsHistoryEdit")
+	public String claimsHistoryEdit(HttpServletRequest request) {
+		try {
+			return service.claimsHistoryEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }
