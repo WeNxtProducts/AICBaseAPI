@@ -358,30 +358,30 @@ public class CommonServiceImpl implements CommonService {
 	@Override
 	public String getQueryParamLOV(HttpServletRequest request) {
 		Map<String, Object> params = processParamLOV(null, request);
-		int queryId = Integer.parseInt(((String) params.get("queryId")));
-		params.remove("queryId");
-		JSONObject response = new JSONObject();
-		QUERY_MASTER query = commonDao.getQueryLov(queryId);
-		if (query != null) {
-			if (query.getQM_QUERY_TYPE().equals("lov")) {
-				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
-				response.put(statusCode, successCode);
-				response.put(dataCode, queryResult);
-			} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
-				List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
-				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
-				paramsMap.remove("queryId");
-				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
-				JSONObject responseData = new JSONObject();
-				responseData.put(query.getQM_QUERY_NAME(), queryResult);
-				response.put(statusCode, successCode);
-				response.put(dataCode, responseData);
-			}
-		} else {
-			response.put(statusCode, errorCode);
-			response.put(messageCode, getLovWrongId);
+	int queryId = Integer.parseInt(((String) params.get("queryId")));
+	params.remove("queryId");
+	JSONObject response = new JSONObject();
+	QUERY_MASTER query = commonDao.getQueryLov(queryId);
+	if (query != null) {
+		if (query.getQM_QUERY_TYPE().equals("lov")) {
+			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
+			response.put(statusCode, successCode);
+			response.put(dataCode, queryResult);
+		} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
+			List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
+			Map<String, Object> paramsMap = processParamLOV(queryParams, request);
+			paramsMap.remove("queryId");
+			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
+			JSONObject responseData = new JSONObject();
+			responseData.put(query.getQM_QUERY_NAME(), queryResult);
+			response.put(statusCode, successCode);
+			response.put(dataCode, responseData);
 		}
-		return response.toString();
+	} else {
+		response.put(statusCode, errorCode);
+		response.put(messageCode, getLovWrongId);
+	}
+	return response.toString();
 	}
 
 	@Override
@@ -1082,16 +1082,15 @@ public class CommonServiceImpl implements CommonService {
 
 		if (packageName == null || packageName.isEmpty() == true) {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
+			
 
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
 				SqlParameterSource parameterSource = new MapSqlParameterSource();
 
-				// Get metadata for the stored procedure
 				ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData()
 						.getProcedureColumns(null, null, procedureName, null);
 
-				// Move the cursor to the first row of the result set
 				while (resultSet.next()) {
 					String parameterName = resultSet.getString("COLUMN_NAME");
 					int parameterType = resultSet.getInt("COLUMN_TYPE");
