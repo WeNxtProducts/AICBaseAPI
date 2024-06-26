@@ -250,7 +250,7 @@ public class CommonController {
 		}
 	}
 	
-	@GetMapping("/getMapQuery")
+	@PostMapping("/getMapQuery")
 	public String getMapQuery(@RequestParam Integer queryId, @RequestBody QueryParametersDTO queryParams) {
 		return service.getMapQuery(queryId, queryParams);
 	}
