@@ -60,7 +60,7 @@ public interface CommonService {
 	
 	public void testLog();
 
-	public String invokeProcedure(String packageName, String procedureName, ProcedureInput procedureInput, HttpServletRequest request);
+	public String invokeProcedure(String procedureName, String packageName, ProcedureInput procedureInput, HttpServletRequest request);
 
 	public void invokeAsyncProcedure(String packageName, String procedureName, ProcedureInput procedureInput, HttpServletRequest request);
 

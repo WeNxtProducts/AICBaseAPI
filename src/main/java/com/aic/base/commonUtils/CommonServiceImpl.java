@@ -510,7 +510,11 @@ public class CommonServiceImpl implements CommonService {
 		JSONObject headingJson = new JSONObject(jsonString);
 		response.put("Heading", jsonString);
 		response.put(statusCode, successCode);
+		if(queryResult.size() > 1) {
 		response.put(dataCode, queryResult);
+		}else {
+			response.put(dataCode, new ArrayList<>());
+		}
 
 		return response.toString();
 	}
@@ -1076,13 +1080,13 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public String invokeProcedure(String packageName, String procedureName, ProcedureInput procedureInput,
+	public String invokeProcedure(String procedureName, String packageName, ProcedureInput procedureInput,
 			HttpServletRequest request) {
 		JSONObject response = new JSONObject();
 
 		if (packageName == null || packageName.isEmpty() == true) {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
-			
+			System.out.println(procedureInput.getInParams());
 
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
@@ -1120,9 +1124,10 @@ public class CommonServiceImpl implements CommonService {
 				response.put(messageCode, e.getMessage());
 			}
 		} else {
+			System.out.println("IN");
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
 					.withProcedureName(procedureName);
-
+			System.out.println(procedureInput.getInParams());
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
 
@@ -1266,7 +1271,8 @@ public class CommonServiceImpl implements CommonService {
 				} else {
 					response.put(statusCode, successCode);
 					response.put(messageCode,
-							"No Datas Found For Policy No: " + queryParams.getQueryParameters().get("CLM_POL_NO"));
+							"No Datas Found");
+					response.put(dataCode, new JSONObject());
 				}
 
 			}

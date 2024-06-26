@@ -224,7 +224,7 @@ public class CommonController {
 	@PostMapping("/invokeProcedure")
 	public String invokeProcedure(@RequestParam String procedureName, @RequestParam(required = false)String packageName, @RequestBody ProcedureInput procedureInput, HttpServletRequest request) {
 		try {
-			return service.invokeProcedure(packageName, procedureName, procedureInput, request);
+			return service.invokeProcedure(procedureName, packageName, procedureInput, request);
 			}catch(Exception e) {
 				e.printStackTrace();
 				return e.getMessage();
