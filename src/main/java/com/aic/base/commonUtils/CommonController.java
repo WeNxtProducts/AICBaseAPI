@@ -264,5 +264,10 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	
+	@GetMapping("/claimListSearch")
+	public String claimListSearch(HttpServletRequest request) {
+		return service.claimListSearch(request);
+	}
 
 }

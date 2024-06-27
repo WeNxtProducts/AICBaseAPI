@@ -1086,7 +1086,6 @@ public class CommonServiceImpl implements CommonService {
 
 		if (packageName == null || packageName.isEmpty() == true) {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
-			System.out.println(procedureInput.getInParams());
 
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
@@ -1105,16 +1104,22 @@ public class CommonServiceImpl implements CommonService {
 
 					}
 				}
-				boolean successFlag = true;
-				for (String key : outParams.keySet()) {
-					if (outParams.get(key) == null) {
-						successFlag = false;
-					}
-				}
-				if (successFlag == true) {
+				System.out.println(outParams);
+//				boolean successFlag = true;
+//				for (String key : outParams.keySet()) {
+//					if (outParams.get(key) == null) {
+//						successFlag = false;
+//					}
+//				}
+				if (outParams.size() > 0) {
 					response.put(statusCode, successCode);
 					response.put(dataCode, outParams);
-				} else {
+					if(outParams.get("P_SUCC_YN").equals("N")) {
+						response.put(statusCode, errorCode);
+						response.put(messageCode, outParams.get("P_ERR_MSG"));
+					}
+				} 
+				else {
 					response.put(statusCode, errorCode);
 					response.put(messageCode, "For the Selected Claim Type No Value's Present");
 				}
@@ -1124,10 +1129,8 @@ public class CommonServiceImpl implements CommonService {
 				response.put(messageCode, e.getMessage());
 			}
 		} else {
-			System.out.println("IN");
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
 					.withProcedureName(procedureName);
-			System.out.println(procedureInput.getInParams());
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
 
@@ -1350,6 +1353,15 @@ public class CommonServiceImpl implements CommonService {
 		response.put(messageCode, "Claim History Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
+	}
+
+	@Override
+	public String claimListSearch(HttpServletRequest request) {
+
+		String documentName = "claimheader";
+
+		return elasticSearch(documentName, request);
+
 	}
 	
 

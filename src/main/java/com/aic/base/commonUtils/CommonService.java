@@ -83,4 +83,6 @@ public interface CommonService {
 
 	public String claimsHistoryEdit(HttpServletRequest request);
 
+	public String claimListSearch(HttpServletRequest request);
+
 }
