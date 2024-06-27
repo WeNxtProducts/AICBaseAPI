@@ -1,5 +1,6 @@
 package com.aic.base.commonUtils;
 
+import org.elasticsearch.search.SearchHit;
 import org.json.JSONObject;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -50,7 +51,7 @@ public interface CommonService {
 
 	public String claimEstimateEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request);
 	
-	public String elasticSearch(String document, HttpServletRequest request);
+	public SearchHit[] elasticSearch(String document, HttpServletRequest request);
 
 	public String claimBeneficiaryEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request);
 

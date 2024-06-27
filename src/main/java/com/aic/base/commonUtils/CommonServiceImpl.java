@@ -55,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.aic.base.logging.LoggerFunction;
+import com.aic.base.model.index.ClaimHdrIndex;
 import com.aic.base.users.LM_MENU_USERS;
 import com.aic.base.users.UserIndex;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -852,8 +853,61 @@ public class CommonServiceImpl implements CommonService {
 	public String userSearch(HttpServletRequest request) {
 
 		String documentName = "users";
+		JSONObject response = new JSONObject();
+		
+		SearchHit[] searchHits = elasticSearch(documentName, request);
+		Map<String, Object> params = processParamLOV(null, request);
 
-		return elasticSearch(documentName, request);
+		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
+		String jsonString = "";
+		
+		QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(params.get("queryId").toString()));
+		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
+				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
+		
+		List<Map<String, Object>> finalResult = new ArrayList<>();
+		Map<String, Object> finalMap = new HashMap<>();
+		
+		ObjectMapper mapper = new ObjectMapper();
+
+		try {
+		UserIndex user = new UserIndex();
+		Class classs = user.getClass();
+		Map<String, Object> firstRow = queryResult.get(0);
+		Set<String> columnNames = firstRow.keySet();
+		String headString = (String) firstRow.get("Head");
+
+		String[] headingNames = headString.split(",");
+		for (String headingName : headingNames) {
+			heading.put(headingName.trim(), headingName.trim());
+		}
+		jsonString = mapper.writeValueAsString(heading);
+		for (SearchHit hit : searchHits) {
+			finalMap = new HashMap<>();
+			user = new UserIndex();
+			mapper.registerModule(new JavaTimeModule());
+			String documentId = hit.getId();
+			String sourceAsString = hit.getSourceAsString();
+			user = mapper.readValue(sourceAsString, UserIndex.class);
+			for (String headings : headingNames) {
+				String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
+						+ headings.substring(1, headings.length());
+				Method setter = classs.getMethod(setterMethodName);
+				Object value = setter.invoke(user);
+				finalMap.put(headings.trim(), value);
+			}
+			finalResult.add(finalMap);
+		}
+		response.put("Count", searchHits.length);
+		response.put("Heading", jsonString);
+		response.put(statusCode, successCode);
+		response.put(dataCode, finalResult);
+		
+		return response.toString();
+		}catch(Exception e) {
+			return e.getMessage();
+		}
+
 
 	}
 
@@ -896,22 +950,22 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public String elasticSearch(String document, HttpServletRequest request) {
+	public SearchHit[] elasticSearch(String document, HttpServletRequest request) {
 		JSONObject response = new JSONObject();
 		Map<String, Object> params = processParamLOV(null, request);
-		RestClientBuilder builder = RestClient.builder(new HttpHost("192.168.1.150", 9200, "http"));
+		RestClientBuilder builder = RestClient.builder(new HttpHost("localhost", 9200, "http"));
 		RestHighLevelClient client = new RestHighLevelClient(builder);
 		ObjectMapper mapper = new ObjectMapper();
 
 		SearchRequest req = new SearchRequest(document);
 		SearchSourceBuilder builders = new SearchSourceBuilder();
 		builders.query(
-				QueryBuilders.boolQuery().should(QueryBuilders.multiMatchQuery(params.get("searchText")).field("*"))
+				QueryBuilders.boolQuery().should(QueryBuilders.multiMatchQuery(params.get("searchText")).field("_all"))
 						.should(QueryBuilders.queryStringQuery("*" + params.get("searchText") + "*")));
-		builders.size(Integer.parseInt(params.get("limit").toString()));
-		builders.from(Integer.parseInt(params.get("offset").toString()));
+//		builders.size(Integer.parseInt(params.get("limit").toString()));
+//		builders.from(Integer.parseInt(params.get("offset").toString()));
 		req.source(builders);
-		QUERY_MASTER query = commonDao.getQueryLov(4);
+		QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(params.get("queryId").toString()));
 		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
 				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
 		List<Map<String, Object>> finalResult = new ArrayList<>();
@@ -921,41 +975,46 @@ public class CommonServiceImpl implements CommonService {
 		try {
 			SearchResponse searchResponse = client.search(req, RequestOptions.DEFAULT);
 			SearchHit[] searchHits = searchResponse.getHits().getHits();
-			UserIndex user = new UserIndex();
-			Class classs = user.getClass();
-			Map<String, Object> firstRow = queryResult.get(0);
-			Set<String> columnNames = firstRow.keySet();
-			String headString = (String) firstRow.get("Head");
-
-			String[] headingNames = headString.split(",");
-			for (String headingName : headingNames) {
-				heading.put(headingName.trim(), headingName.trim());
-			}
-			jsonString = mapper.writeValueAsString(heading);
-			for (SearchHit hit : searchHits) {
-				finalMap = new HashMap<>();
-				user = new UserIndex();
-				mapper.registerModule(new JavaTimeModule());
-				String documentId = hit.getId();
-				String sourceAsString = hit.getSourceAsString();
-				user = mapper.readValue(sourceAsString, UserIndex.class);
-				for (String headings : headingNames) {
-					String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
-							+ headings.substring(1, headings.length());
-					Method setter = classs.getMethod(setterMethodName);
-					Object value = setter.invoke(user);
-					finalMap.put(headings.trim(), value);
-				}
-				finalResult.add(finalMap);
-			}
-			response.put("Count", searchHits.length);
-			response.put("Heading", jsonString);
-			response.put(statusCode, successCode);
-			response.put(dataCode, finalResult);
+			
+			System.out.println(searchHits.length);
+//			UserIndex user = new UserIndex();
+//			Class classs = user.getClass();
+//			Map<String, Object> firstRow = queryResult.get(0);
+//			Set<String> columnNames = firstRow.keySet();
+//			String headString = (String) firstRow.get("Head");
+//
+//			String[] headingNames = headString.split(",");
+//			for (String headingName : headingNames) {
+//				heading.put(headingName.trim(), headingName.trim());
+//			}
+//			jsonString = mapper.writeValueAsString(heading);
+//			for (SearchHit hit : searchHits) {
+//				finalMap = new HashMap<>();
+//				user = new UserIndex();
+//				mapper.registerModule(new JavaTimeModule());
+//				String documentId = hit.getId();
+//				String sourceAsString = hit.getSourceAsString();
+//				user = mapper.readValue(sourceAsString, UserIndex.class);
+//				for (String headings : headingNames) {
+//					String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
+//							+ headings.substring(1, headings.length());
+//					Method setter = classs.getMethod(setterMethodName);
+//					Object value = setter.invoke(user);
+//					finalMap.put(headings.trim(), value);
+//				}
+//				finalResult.add(finalMap);
+//			}
+//			response.put("Count", searchHits.length);
+//			response.put("Heading", jsonString);
+//			response.put(statusCode, successCode);
+//			response.put(dataCode, finalResult);
+			return searchHits;
 		} catch (Exception e) {
 			e.printStackTrace();
+			return null;
 		}
-		return response.toString();
+		
+//		return response.toString();
 	}
 
 //	@Override
@@ -1111,6 +1170,7 @@ public class CommonServiceImpl implements CommonService {
 //						successFlag = false;
 //					}
 //				}
+				System.out.println(outParams.size());
 				if (outParams.size() > 0) {
 					response.put(statusCode, successCode);
 					response.put(dataCode, outParams);
@@ -1266,11 +1326,9 @@ public class CommonServiceImpl implements CommonService {
 					response.put(statusCode, successCode);
 					response.put(messageCode, "Data Fetched Successfully");
 
-					if (finalResult.size() == 1) {
-						response.put(dataCode, finalResult.get(0));
-					} else {
+					if (finalResult.size() >= 1) {
 						response.put(dataCode, finalResult);
-					}
+					} 
 				} else {
 					response.put(statusCode, successCode);
 					response.put(messageCode,
@@ -1359,8 +1417,62 @@ public class CommonServiceImpl implements CommonService {
 	public String claimListSearch(HttpServletRequest request) {
 
 		String documentName = "claimheader";
+		JSONObject response = new JSONObject();
+		
+		SearchHit[] searchHits = elasticSearch(documentName, request);
+		Map<String, Object> params = processParamLOV(null, request);
 
-		return elasticSearch(documentName, request);
+		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
+		String jsonString = "";
+		
+		QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(params.get("queryId").toString()));
+		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
+				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
+		
+		List<Map<String, Object>> finalResult = new ArrayList<>();
+		Map<String, Object> finalMap = new HashMap<>();
+		
+		ObjectMapper mapper = new ObjectMapper();
+
+		try {
+		ClaimHdrIndex claim = new ClaimHdrIndex();
+		Class classs = claim.getClass();
+		Map<String, Object> firstRow = queryResult.get(0);
+		Set<String> columnNames = firstRow.keySet();
+		String headString = (String) firstRow.get("Head");
+
+		String[] headingNames = headString.split(",");
+		for (String headingName : headingNames) {
+			heading.put(headingName.trim(), headingName.trim());
+		}
+		jsonString = mapper.writeValueAsString(heading);
+		for (SearchHit hit : searchHits) {
+			finalMap = new HashMap<>();
+			claim = new ClaimHdrIndex();
+			mapper.registerModule(new JavaTimeModule());
+			String documentId = hit.getId();
+			String sourceAsString = hit.getSourceAsString();
+			claim = mapper.readValue(sourceAsString, ClaimHdrIndex.class);
+			for (String headings : headingNames) {
+				String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
+						+ headings.substring(1, headings.length());
+				Method setter = classs.getMethod(setterMethodName);
+				Object value = setter.invoke(claim);
+				finalMap.put(headings.trim(), value);
+			}
+			finalResult.add(finalMap);
+		}
+		response.put("Count", searchHits.length);
+		response.put("Heading", jsonString);
+		response.put(statusCode, successCode);
+		response.put(dataCode, finalResult);
+		
+		return response.toString();
+		}catch(Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+
 
 	}
 	
