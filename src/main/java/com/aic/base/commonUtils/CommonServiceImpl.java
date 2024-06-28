@@ -511,7 +511,7 @@ public class CommonServiceImpl implements CommonService {
 		JSONObject headingJson = new JSONObject(jsonString);
 		response.put("Heading", jsonString);
 		response.put(statusCode, successCode);
-		if(queryResult.size() > 1) {
+		if(queryResult.size() >= 1) {
 		response.put(dataCode, queryResult);
 		}else {
 			response.put(dataCode, new ArrayList<>());
@@ -962,8 +962,8 @@ public class CommonServiceImpl implements CommonService {
 		builders.query(
 				QueryBuilders.boolQuery().should(QueryBuilders.multiMatchQuery(params.get("searchText")).field("_all"))
 						.should(QueryBuilders.queryStringQuery("*" + params.get("searchText") + "*")));
-//		builders.size(Integer.parseInt(params.get("limit").toString()));
-//		builders.from(Integer.parseInt(params.get("offset").toString()));
+		builders.size(Integer.parseInt(params.get("limit").toString()));
+		builders.from(Integer.parseInt(params.get("offset").toString()));
 		req.source(builders);
 		QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(params.get("queryId").toString()));
 		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
