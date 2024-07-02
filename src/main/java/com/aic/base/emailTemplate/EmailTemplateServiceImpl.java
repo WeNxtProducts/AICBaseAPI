@@ -488,12 +488,12 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				}
 			}
 
-			if (inputObject.getCcIds() != null || inputObject.getCcIds().size() < 1) {
+			if (inputObject.getCcIds() != null && inputObject.getCcIds().size() > 0) {
 				for (String ccId : inputObject.getCcIds()) {
 					ccIds.append(ccId + ",");
 				}
 			}
-			if (inputObject.getBccIds() != null || inputObject.getBccIds().size() < 1) {
+			if (inputObject.getBccIds() != null && inputObject.getBccIds().size() > 0) {
 				for (String bccId : inputObject.getBccIds()) {
 					bccIds.append(bccId + ",");
 				}

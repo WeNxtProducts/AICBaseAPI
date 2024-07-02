@@ -333,16 +333,16 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 
 										byte[] byteArray = new byte[attachmentArray.length()];
 
-										// Iterate through the JSONArray and convert each integer to byte
 										for (int i = 0; i < attachmentArray.length(); i++) {
 											byteArray[i] = (byte) attachmentArray.getInt(i);
 										}
 										attachment.put(autoDispDocCondDetail.getADDC_TEMP_NAME(), byteArray);
 										j++;
-										attachmentProcessMessage.append(autoDispDocCondDetail.getADDC_TEMP_NAME() + ", ");
+										attachmentProcessMessage
+												.append(autoDispDocCondDetail.getADDC_TEMP_NAME() + ", ");
 									}
-									
-									attachmentProcessMessage.deleteCharAt(attachmentProcessMessage.length()-2);
+
+									attachmentProcessMessage.deleteCharAt(attachmentProcessMessage.length() - 2);
 									attachmentProcessMessage.append(" are Processed");
 									Map<?, ?> map = (Map<?, ?>) autoDispatchDTO.getEmailParams().getFormFields()
 											.get("content");
@@ -357,9 +357,52 @@ public class AutoDispatchServiceImpl implements AutoDispatchService {
 											Integer.parseInt(autoDispatchDetails.getADS_EMAIL_TEMP_ID()), emailRequest,
 											request);
 								}
+								response.put(statusCode, successCode);
+								response.put(messageCode, attachmentProcessMessage.toString());
+							} else {
+								EmailRequestModel emailRequest = new EmailRequestModel();
+								List<String> toIdsList = new ArrayList<>();
+								List<?> toIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields().get("toIds");
+								if (toIds != null) {
+									for (Object obj : toIds) {
+										toIdsList.add(obj.toString());
+									}
+									emailRequest.setToIds(toIdsList);
+								}
+								List<String> ccIdsList = new ArrayList<>();
+								List<?> ccIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields().get("ccIds");
+								if (ccIds != null) {
+									for (Object obj : ccIds) {
+										ccIdsList.add(obj.toString());
+									}
+									emailRequest.setCcIds(ccIdsList);
+								}
+								List<String> bccIdsList = new ArrayList<>();
+								List<?> bccIds = (List<?>) autoDispatchDTO.getEmailParams().getFormFields()
+										.get("bccIds");
+								if (bccIds != null) {
+									for (Object obj : bccIds) {
+										bccIdsList.add(obj.toString());
+									}
+									emailRequest.setBccIds(bccIdsList);
+								}
+								emailRequest.setSubject(
+										autoDispatchDTO.getEmailParams().getFormFields().get("subject").toString());
+								Map<?, ?> map = (Map<?, ?>) autoDispatchDTO.getEmailParams().getFormFields()
+										.get("content");
+
+								Map<String, Object> contentMap = new HashMap<>();
+								for (Map.Entry<?, ?> entry : map.entrySet()) {
+									contentMap.put(entry.getKey().toString(), entry.getValue());
+								}
+								emailRequest.setContent(contentMap);
+								emailTemplateService.sendMail(
+										Integer.parseInt(autoDispatchDetails.getADS_EMAIL_TEMP_ID()), emailRequest,
+										request);
+
+								response.put(statusCode, successCode);
+								response.put(messageCode, "Email Sent Successfully");
 							}
-							response.put(statusCode, successCode);
-							response.put(messageCode, attachmentProcessMessage.toString());
 						}
 					} else {
 						response.put(statusCode, errorCode);
