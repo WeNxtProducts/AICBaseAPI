@@ -86,4 +86,18 @@ public interface CommonService {
 
 	public String claimListSearch(HttpServletRequest request);
 
+	public String polBeneficiaryEdit(HttpServletRequest request);
+
+	public String polBrokerEdit(HttpServletRequest request);
+
+	public String polChargeEdit(HttpServletRequest request);
+
+	public String polDiscLoadEdit(HttpServletRequest request);
+
+	public String polEmpCoverEdit(HttpServletRequest request);
+
+	public String polEmployeeEdit(HttpServletRequest request);
+
+	public String policyEdit(HttpServletRequest request);
+
 }

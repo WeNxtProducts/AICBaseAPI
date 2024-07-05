@@ -269,5 +269,75 @@ public class CommonController {
 	public String claimListSearch(HttpServletRequest request) {
 		return service.claimListSearch(request);
 	}
+	
+	@GetMapping("/polBeneficiaryEdit")
+	public String polBeneficiaryEdit(HttpServletRequest request) {
+		try {
+			return service.polBeneficiaryEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/polBrokerEdit")
+	public String polBrokerEdit(HttpServletRequest request) {
+		try {
+			return service.polBrokerEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/polChargeEdit")
+	public String polChargeEdit(HttpServletRequest request) {
+		try {
+			return service.polChargeEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/polDiscLoadEdit")
+	public String polDiscLoadEdit(HttpServletRequest request) {
+		try {
+			return service.polDiscLoadEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/polEmpCoverEdit")
+	public String polEmpCoverEdit(HttpServletRequest request) {
+		try {
+			return service.polEmpCoverEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/polEmployeeEdit")
+	public String polEmployeeEdit(HttpServletRequest request) {
+		try {
+			return service.polEmployeeEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/policyEdit")
+	public String policyEdit(HttpServletRequest request) {
+		try {
+			return service.policyEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }

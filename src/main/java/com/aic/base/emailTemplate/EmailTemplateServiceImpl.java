@@ -556,11 +556,8 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			
 			for (String filename : fileName) {
 			    MimeBodyPart attachmentPart = new MimeBodyPart();
-			    // Set the content type based on the file extension or use a default type
-			    String contentType = "application/octet-stream"; // Default content type
-			    // Adjust content type based on file extension if needed
+			    String contentType = "application/octet-stream";
 			    if (filename.endsWith(".pdf")) {
-			    
 			        contentType = "application/pdf";
 			    } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
 			        contentType = "image/jpeg";
