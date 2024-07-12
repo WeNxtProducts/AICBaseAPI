@@ -339,5 +339,15 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	
+	@GetMapping("/medicalDetailsEdit")
+	public String medicalDetailsEdit(HttpServletRequest request) {
+		try {
+			return service.medicalDetailsEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }

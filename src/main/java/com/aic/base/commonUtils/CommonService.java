@@ -100,4 +100,6 @@ public interface CommonService {
 
 	public String policyEdit(HttpServletRequest request);
 
+	public String medicalDetailsEdit(HttpServletRequest request);
+
 }
