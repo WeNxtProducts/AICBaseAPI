@@ -1629,7 +1629,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(messageCode, "Policy Details Fetched Successfully");
 		response.put(dataCode, obj);
 		try {
-		if(object.get("POL_NO") == null) {
+		if(object.get("POL_NO") != null) {
 		response.put("PROPOSAL_NO", object.get("POL_NO"));
 		}else {
 			response.put("PROPOSAL_NO", "");	
