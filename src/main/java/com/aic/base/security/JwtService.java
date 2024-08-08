@@ -4,20 +4,29 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
+
+import com.aic.base.users.LM_MENU_USERS;
+import com.aic.base.users.UserMasterRepository;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 
 @Service
 public class JwtService {
+	
+	@Autowired
+	private UserMasterRepository userrrepo;
 
 	public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
@@ -27,6 +36,9 @@ public class JwtService {
 		claims.put("Department", userName.getDepartment());
 		claims.put("Company", userName.getCompany());
 		claims.put("Currency", userName.getBaseCurrency());
+		Optional<LM_MENU_USERS> userDetail = userrrepo.findByUserId(userName.getUsername());
+
+		claims.put("Role", userDetail.get().getUser_group_id());
 		return createToken(claims, userName.getUsername());
 	}
 
@@ -79,6 +91,29 @@ public class JwtService {
 		}
 
 		return null;
+	}
+	
+	public AuthRequest getLoggedInDetails(String token) {
+		 try {
+			 AuthRequest loggedInDetails = new AuthRequest();
+	            Claims claims = Jwts.parser()
+	                                .setSigningKey(SECRET)
+	                                .parseClaimsJws(token)
+	                                .getBody();
+	            
+	            // Access specific claims
+	            loggedInDetails.setUsername(claims.get("userId", String.class));
+	            loggedInDetails.setDivision(claims.get("division", String.class));
+	            loggedInDetails.setDepartment(claims.get("department", String.class));
+	            loggedInDetails.setBaseCurrency(claims.get("baseCurrency", String.class));
+	            
+	            return loggedInDetails;
+	        } catch (SignatureException e) {
+	            System.out.println("Invalid JWT signature");
+	        } catch (Exception e) {
+	            System.out.println("Token parsing failed: " + e.getMessage());
+	        }
+		 return null;
 	}
 
 }

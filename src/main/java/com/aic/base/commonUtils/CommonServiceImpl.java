@@ -387,6 +387,7 @@ public class CommonServiceImpl implements CommonService {
 
 	@Override
 	public String getListingData(HttpServletRequest request) {
+		System.out.println("IN");
 		JSONObject response = new JSONObject();
 		Map<String, Object> params = processParamLOV(null, request);
 		int queryId = Integer.parseInt(((String) params.get("queryId")));
@@ -1622,11 +1623,20 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
-
+		System.out.println(object);
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "Policy Details Fetched Successfully");
 		response.put(dataCode, obj);
+		try {
+		if(object.get("POL_NO") == null) {
+		response.put("PROPOSAL_NO", object.get("POL_NO"));
+		}else {
+			response.put("PROPOSAL_NO", "");	
+		}
+		}catch(Exception e) {
+			response.put("PROPOSAL NO", "");
+		}
 		return response.toString();
 	}
 
@@ -1648,6 +1658,50 @@ public class CommonServiceImpl implements CommonService {
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "Policy Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String receiptHeaderEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "receiptHdr/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Receipt Header Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String receiptProcessEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "receiptProcess/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Receipt Process Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
 	}

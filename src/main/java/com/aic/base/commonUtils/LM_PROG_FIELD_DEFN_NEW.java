@@ -238,24 +238,24 @@ public class LM_PROG_FIELD_DEFN_NEW
 		this._PFD_HIDE_YN = value;
 	}
 
-	@Column(name = "PFD_EDIT_YN")
-	private String _PFD_EDIT_YN;
-	public String getPFD_EDIT_YN()
+	@Column(name = "PFD_EDIT_YN", columnDefinition = "TINYINT")
+	private boolean _PFD_EDIT_YN;
+	public boolean getPFD_EDIT_YN()
 	{
 		return this._PFD_EDIT_YN;
 	}
-	public void setPFD_EDIT_YN(String value)
+	public void setPFD_EDIT_YN(boolean value)
 	{
 		this._PFD_EDIT_YN = value;
 	}
 
-	@Column(name = "PFD_VALIDATION_YN")
-	private String _PFD_VALIDATION_YN;
-	public String getPFD_VALIDATION_YN()
+	@Column(name = "PFD_VALIDATION_YN", columnDefinition = "TINYINT")
+	private boolean _PFD_VALIDATION_YN;
+	public boolean getPFD_VALIDATION_YN()
 	{
 		return this._PFD_VALIDATION_YN;
 	}
-	public void setPFD_VALIDATION_YN(String value)
+	public void setPFD_VALIDATION_YN(boolean value)
 	{
 		this._PFD_VALIDATION_YN = value;
 	}

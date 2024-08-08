@@ -102,4 +102,8 @@ public interface CommonService {
 
 	public String medicalDetailsEdit(HttpServletRequest request);
 
+	public String receiptHeaderEdit(HttpServletRequest request);
+
+	public String receiptProcessEdit(HttpServletRequest request);
+
 }

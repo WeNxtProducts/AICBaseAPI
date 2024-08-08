@@ -349,5 +349,25 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	
+	@GetMapping("/receiptHeaderEdit")
+	public String receiptHeaderEdit(HttpServletRequest request) {
+		try {
+			return service.receiptHeaderEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
+	
+	@GetMapping("/receiptProcessEdit")
+	public String receiptProcessEdit(HttpServletRequest request) {
+		try {
+			return service.receiptProcessEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }

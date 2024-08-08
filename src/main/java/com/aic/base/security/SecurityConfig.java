@@ -71,12 +71,6 @@ public class SecurityConfig {
 				.authorizeHttpRequests()
 				.requestMatchers("/common/insertException").permitAll()
 				.and()
-
-//				.authorizeHttpRequests() 
-//				.requestMatchers("/auth/getCompList", "/auth/getBranchList", "/auth/getDept", "/auth/login").permitAll()
-//				.and()
-//				.authorizeHttpRequests().requestMatchers("/auth/reset","/auth/forgot-password","/auth/reset-password").authenticated()
-//				.and()
 				.authorizeHttpRequests().requestMatchers("/common/**").authenticated() 
 				.and()
 				.authorizeHttpRequests().requestMatchers("/usermaster/**").authenticated() 

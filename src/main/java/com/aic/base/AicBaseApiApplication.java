@@ -15,7 +15,7 @@ import com.ulisesbocchio.jasyptspringboot.annotation.EnableEncryptableProperties
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 
-@SpringBootApplication
+@SpringBootApplication(proxyBeanMethods = false)
 @PropertySource("classpath:Properties/login_msgs.properties")
 @PropertySource("classpath:Properties/lov_msgs.properties")
 @PropertySource("classpath:Properties/auditexcep_msgs.properties")

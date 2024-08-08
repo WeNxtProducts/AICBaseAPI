@@ -32,6 +32,7 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 
         if (password.equals(encryptor.decrypt(pass)) && username.equals(user.getUsername())) {
             // Authentication successful
+        	System.out.println(user.getAuthorities());
             return new UsernamePasswordAuthenticationToken(username, password, user.getAuthorities());
         } else {
             // Authentication failed

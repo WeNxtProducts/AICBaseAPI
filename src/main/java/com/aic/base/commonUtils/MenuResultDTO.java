@@ -27,6 +27,10 @@ public class MenuResultDTO {
 	private String listingQueryId;
 	
 	private String menuIconPath;
+	
+	private Integer ds_type;
+	
+	private String ds_code;
 
 	public String getMenuId() {
 		return menuId;
@@ -114,6 +118,22 @@ public class MenuResultDTO {
 
 	public void setMenuIconPath(String menuIconPath) {
 		this.menuIconPath = menuIconPath;
+	}
+
+	public Integer getDs_type() {
+		return ds_type;
+	}
+
+	public void setDs_type(Integer ds_type) {
+		this.ds_type = ds_type;
+	}
+
+	public String getDs_code() {
+		return ds_code;
+	}
+
+	public void setDs_code(String ds_code) {
+		this.ds_code = ds_code;
 	}
 
 }
