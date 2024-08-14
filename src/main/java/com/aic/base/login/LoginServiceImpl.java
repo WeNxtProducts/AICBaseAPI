@@ -29,13 +29,17 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.aic.base.commonUtils.LOVDTO;
+import com.aic.base.logHistory.LoginAppenderServiceImpl;
 import com.aic.base.security.AuthRequest;
 import com.aic.base.security.JwtService;
 import com.aic.base.users.LM_MENU_USERS;
 import com.aic.base.users.UserMasterRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -115,6 +119,10 @@ public class LoginServiceImpl implements LoginService {
 
 	@Autowired
 	LmMenuUserCompDivnReposistory lmmenuuserCompdivrepo;
+	
+	@Autowired
+	private LoginAppenderServiceImpl loginservice;
+
 
 	@Override
 	public String getCompany(LoginDropDownRequestModel user) {
@@ -283,6 +291,13 @@ public class LoginServiceImpl implements LoginService {
 						response.put("Status", "SUCCESS");
 						response.put("status_msg", "User Logged In Successfully");
 						response.put("Data", data);
+						
+						// Ensure HttpServletRequest is available
+	                    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+	                    
+	                    // Correct method call
+	                    loginservice.loginToLJMLogs1("User logged in successfully", request, token);
+
 						return response.toString();
 					} else {
 						response.put("Status", "FAILURE");
