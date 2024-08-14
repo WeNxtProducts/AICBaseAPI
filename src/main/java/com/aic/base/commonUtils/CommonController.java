@@ -369,5 +369,15 @@ public class CommonController {
 				return e.getMessage();
 			}
 	}
+	
+	@GetMapping("/polConditionEdit")
+	public String polConditionEdit(HttpServletRequest request) {
+		try {
+			return service.polConditionEdit(request);
+			}catch(Exception e) {
+				e.printStackTrace();
+				return e.getMessage();
+			}
+	}
 
 }

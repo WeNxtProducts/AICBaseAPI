@@ -106,4 +106,6 @@ public interface CommonService {
 
 	public String receiptProcessEdit(HttpServletRequest request);
 
+	public String polConditionEdit(HttpServletRequest request);
+
 }
