@@ -16,7 +16,10 @@ import org.kie.api.runtime.KieContainer;
 import org.kie.api.runtime.KieSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.SimpleMailMessage;
@@ -33,6 +36,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.aic.base.commonUtils.LOVDTO;
+import com.aic.base.commonUtils.ProcedureInput;
 import com.aic.base.logHistory.LoginAppenderServiceImpl;
 import com.aic.base.security.AuthRequest;
 import com.aic.base.security.JwtService;
@@ -261,12 +265,10 @@ public class LoginServiceImpl implements LoginService {
 		String token = "";
 
 		try {
-			// Try to authenticate the user
 			Authentication authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
 					login.getPassword());
 			Authentication authentication = authenticationManager.authenticate(authenticationToken);
 
-			// Generate JWT token
 			token = jwtService.generateToken(auth);
 		
 			Optional<LM_MENU_USERS> menuUser = userrepo.findByUserId(login.getUserName());
@@ -280,8 +282,7 @@ public class LoginServiceImpl implements LoginService {
 					response.put("status_msg", "Please direct to reset password page");
 					response.put("Data", data);
 					return response.toString();
-				} else {
-					
+				} else {					
 		            
 					if (token != null ) {
 						
@@ -291,12 +292,34 @@ public class LoginServiceImpl implements LoginService {
 						response.put("Status", "SUCCESS");
 						response.put("status_msg", "User Logged In Successfully");
 						response.put("Data", data);
-						
-						// Ensure HttpServletRequest is available
+
 	                    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-	                    
-	                    // Correct method call
+
 	                    loginservice.loginToLJMLogs1("User logged in successfully", request, token);
+	                    
+	                    AuthRequest userDetails = jwtService.getLoggedInDetails(token);
+	                    
+	                    Map<String, String> inputMap = new HashMap<>();
+	        			inputMap.put("P_USER", userDetails.getUsername());
+	        			inputMap.put("P_COMP_CODE", userDetails.getCompany());
+	        			inputMap.put("P_DEPT_CODE", userDetails.getDepartment());
+	        			inputMap.put("P_DIV_CODE", userDetails.getDivision());
+	        			inputMap.put("P_BASE_CURR", userDetails.getBaseCurrency());
+	        			inputMap.put("P_LANG_CODE", "ENG");
+	        			inputMap.put("P_FOR_LANG_CODE", null);
+	        			inputMap.put("P_PROG_NAME", null);
+	        			inputMap.put("P_NOOF_DEC", null);
+
+	        			ProcedureInput input = new ProcedureInput();
+	        			input.setInParams(inputMap);
+
+	        			String url = "http://localhost:8098/" + "common/invokeProcedure?procedureName=" + "P_SET_PARA_VALUES&packageName=WNPKG_VARS";
+	        			HttpHeaders headers = new HttpHeaders();
+	        			RestTemplate restTemplate = new RestTemplate();
+	        			headers.setContentType(MediaType.APPLICATION_JSON);
+	        			headers.set("Authorization", "Bearer " + token);
+	        			HttpEntity<ProcedureInput> requestEntity = new HttpEntity<>(input, headers);
+	        			ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 
 						return response.toString();
 					} else {
@@ -309,12 +332,10 @@ public class LoginServiceImpl implements LoginService {
 				return response.toString();
 			}
 		} catch (BadCredentialsException e) {
-			// Handle incorrect password
 			response.put("Status", "FAILURE");
 			response.put("status_msg", "Incorrect password");
 			return response.toString();
 		} catch (UsernameNotFoundException e) {
-			// Handle username not found
 			response.put("Status", "FAILURE");
 			response.put("status_msg", "Username not found");
 			return response.toString();
