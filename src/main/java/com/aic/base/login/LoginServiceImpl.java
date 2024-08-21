@@ -272,7 +272,6 @@ public class LoginServiceImpl implements LoginService {
 			token = jwtService.generateToken(auth);
 		
 			Optional<LM_MENU_USERS> menuUser = userrepo.findByUserId(login.getUserName());
-			// Check if authentication is successful
 			if (authentication.isAuthenticated()) {
 				boolean isFlagSet = checkFlagInMenuTable(authentication); // Check flag in lm_menu table
 				if (isFlagSet) {
@@ -344,15 +343,10 @@ public class LoginServiceImpl implements LoginService {
 
 	private boolean checkFlagInMenuTable(Authentication authentication) {
 		if (authentication != null && authentication.isAuthenticated()) {
-			// Retrieve the username of the logged-in user
 			String username = authentication.getName();
 
-			// Assuming you have access to the repository and a method to find the user by
-			// username
 			LM_MENU_USERS menuUser = userrepo.findByUserIdAndUserFirstLoginyn(username, true);
 
-			// Check if menuUser is not null, indicating the flag is set for the logged-in
-			// user
 			return menuUser != null;
 		}
 		return false;
@@ -381,7 +375,7 @@ public class LoginServiceImpl implements LoginService {
 		List<LOVDTO> list = new ArrayList<>();
 		for (int i = 0; i < jsonArray.length(); i++) {
 			JSONObject obj = jsonArray.getJSONObject(i);
-			LOVDTO model = new LOVDTO(obj.get("label"), obj.get("value")); // Assuming model structure
+			LOVDTO model = new LOVDTO(obj.get("label"), obj.get("value"));
 			list.add(model);
 		}
 		List<JSONObject> data = new ArrayList<>();
@@ -417,7 +411,6 @@ public class LoginServiceImpl implements LoginService {
 			return "New password and confirm password do not match!";
 		}
 
-		// Retrieve the username from JWT token
 		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 		String jwtuser = authentication.getName();
 
@@ -430,7 +423,6 @@ public class LoginServiceImpl implements LoginService {
 
 			String decryptedPassword = encryptor.decrypt(hashedPassword);
 			if (password.equals(decryptedPassword)) {
-				// Encode and set the new password
 				user.setUser_passwd(encryptor.encrypt(newPassword));
 				user.setUserFirstLoginyn(false);
 				userrepo.save(user);
@@ -496,26 +488,22 @@ public class LoginServiceImpl implements LoginService {
 		try {
 			LM_MENU_USERS user = userrepo.findByUserResettoken(token);
 			if (user != null) {
-				// Update user's password and reset token
 				user.setUser_passwd(encryptor.encrypt(newPassword));
 				user.setUserResettoken(null);
 
 				userrepo.save(user);
 
-				// Generate new token
 				String newToken = UUID.randomUUID().toString();
 
 				response.put("Status", "SUCCESS");
 				response.put("status_msg", "password reset sucessfully");
 				return ResponseEntity.ok(response.toString());
 			} else {
-				// Invalid token
 				response.put("Status", "FAILURE");
 				response.put("status_msg", "Invalid token");
 				return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response.toString());
 			}
 		} catch (Exception e) {
-			// Exception occurred
 			response.put("Status", "FAILURE");
 			response.put("status_msg", "Failed to reset password: " + e.getMessage());
 			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response.toString());
@@ -532,10 +520,8 @@ public class LoginServiceImpl implements LoginService {
 			String jwtUser = authentication.getName();
 
 			if ("ADMIN".equals(username) && "ADMIN".equals(jwtUser)) {
-				// Assuming userrepo is a repository for user data
 				List<LM_MENU_USERS> userList = userrepo.findAll();
 
-				// Find the user by userId
 				Optional<LM_MENU_USERS> userOptional = userList.stream().filter(user -> userId.equals(user.getUserId()))
 						.findFirst();
 
@@ -544,7 +530,6 @@ public class LoginServiceImpl implements LoginService {
 					String encryptedPassword = user.getUser_passwd();
 					String decryptedPassword = encryptor.decrypt(encryptedPassword);
 
-					// Verify admin password
 					if (password.equals("Test@123")) {
 						data.put("UserID", user.getUserId());
 						data.put("Password", decryptedPassword);
@@ -634,7 +619,6 @@ public class LoginServiceImpl implements LoginService {
 		String baseURL = getBaseURL + "common/getparamlov?queryId=";
 
 		try {
-			// Fetching country list
 			String url = baseURL + "19";
 
 			ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
@@ -652,7 +636,6 @@ public class LoginServiceImpl implements LoginService {
 				throw new UsernameNotFoundException("Error fetching country list");
 			}
 
-			// Fetching branch list
 			if (user.getCompanyCode() != null) {
 				url = baseURL + "20&divn_comp_code=" + user.getCompanyCode();
 				responseEntity = restTemplate.getForEntity(url, String.class);
@@ -673,7 +656,6 @@ public class LoginServiceImpl implements LoginService {
 				throw new UsernameNotFoundException("Company code is required");
 			}
 
-			// Fetching department list
 			if (user.getBranchCode() != null) {
 				url = baseURL + "28" + "&dept_divn_code=" + user.getBranchCode();
 				responseEntity = restTemplate.getForEntity(url, String.class);
@@ -694,7 +676,6 @@ public class LoginServiceImpl implements LoginService {
 				throw new UsernameNotFoundException("Branch code is required");
 			}
 
-			// Response construction
 			response.put(statusCode, successCode);
 			response.put(messageCode, "getCompanyMessage");
 			response.put("companyList", user.getCompanyListCodes());
@@ -730,8 +711,6 @@ public class LoginServiceImpl implements LoginService {
 			String divisionCode = deptrequest.getBranchCode();
 			String departmentCode = deptrequest.getDepartmentCode();
 
-			// Update or create LM_MENU_USER_COMP record
-
 			LM_MENU_USER_COMP existingComp = null;
 			if (deptrequest.getCompId() != null) {
 				existingComp = repo.findById(deptrequest.getCompId()).orElse(null);
@@ -763,7 +742,6 @@ public class LoginServiceImpl implements LoginService {
 				response.put(messageCode, "LM menu company created successfully");
 			}
 
-			// Update or create LM_MENU_USER_COMP_DIVN record
 			LM_MENU_USER_COMP_DIVN existingCompDivn = lmmenuuserCompdivrepo
 					.findByuserIdAndCompCode(divnUserId, divnCompCode);
 			if (existingCompDivn != null) {
@@ -775,7 +753,6 @@ public class LoginServiceImpl implements LoginService {
 
 				existingCompDivn.setMucd_divn_code(divisionCode);
 				existingCompDivn.setMucd_dept_code(departmentCode);
-				// Set other fields if needed
 				lmmenuuserCompdivrepo.save(existingCompDivn);
 				response.put(statusCode, successCode);
 				response.put(messageCode, "LM menu company divn updated successfully");
@@ -788,7 +765,6 @@ public class LoginServiceImpl implements LoginService {
 				newCompDivn.setMucd_comp_code(companyCode);
 				newCompDivn.setMucd_divn_code(divisionCode);
 				newCompDivn.setMucd_dept_code(departmentCode);
-				// Set other fields if needed
 				lmmenuuserCompdivrepo.save(newCompDivn);
 				response.put(statusCode, successCode);
 				response.put(messageCode, "LM menu company divn created successfully");
@@ -812,7 +788,6 @@ public class LoginServiceImpl implements LoginService {
 			String divisionCode = user.getBranchCode();
 			String departmentCode = user.getDepartmentCode();
 
-			// Check if records exist before deletion
 			LM_MENU_USER_COMP existingComp = null;
 			if (user.getCompId() != null) {
 				existingComp = repo.findById(user.getCompId()).orElse(null);
@@ -826,10 +801,8 @@ public class LoginServiceImpl implements LoginService {
 				return response.toString();
 			}
 
-			// Delete records in LM_MENU_USER_COMP table
 			repo.deleteByUserIdAndCompCode(userId, companyCode);
 
-			// Delete records in LM_MENU_USER_COMP_DIVN table
 			lmmenuuserCompdivrepo.deleteByUserIdAndCompCodeAndDivnCodeAndDeptCode(userId, companyCode, divisionCode,
 					departmentCode);
 
@@ -838,7 +811,7 @@ public class LoginServiceImpl implements LoginService {
 		} catch (Exception e) {
 			response.put(statusCode, errorCode);
 			response.put(messageCode, "Error occurred: " + e.getMessage());
-			e.printStackTrace(); // Log the exception for debugging
+			e.printStackTrace();
 		}
 
 		return response.toString();

@@ -387,7 +387,6 @@ public class CommonServiceImpl implements CommonService {
 
 	@Override
 	public String getListingData(HttpServletRequest request) {
-		System.out.println("IN");
 		JSONObject response = new JSONObject();
 		Map<String, Object> params = processParamLOV(null, request);
 		int queryId = Integer.parseInt(((String) params.get("queryId")));
@@ -977,7 +976,6 @@ public class CommonServiceImpl implements CommonService {
 			SearchResponse searchResponse = client.search(req, RequestOptions.DEFAULT);
 			SearchHit[] searchHits = searchResponse.getHits().getHits();
 			
-			System.out.println(searchHits.length);
 //			UserIndex user = new UserIndex();
 //			Class classs = user.getClass();
 //			Map<String, Object> firstRow = queryResult.get(0);
@@ -1164,14 +1162,12 @@ public class CommonServiceImpl implements CommonService {
 
 					}
 				}
-				System.out.println(outParams);
 //				boolean successFlag = true;
 //				for (String key : outParams.keySet()) {
 //					if (outParams.get(key) == null) {
 //						successFlag = false;
 //					}
 //				}
-				System.out.println(outParams.size());
 				if (outParams.size() > 0) {
 					response.put(statusCode, successCode);
 					response.put(dataCode, outParams);
@@ -1623,7 +1619,6 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
-		System.out.println(object);
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "Policy Details Fetched Successfully");
@@ -1633,6 +1628,12 @@ public class CommonServiceImpl implements CommonService {
 		response.put("PROPOSAL_NO", object.get("POL_NO"));
 		}else {
 			response.put("PROPOSAL_NO", "");	
+		}
+		
+		if(object.get("POL_WF_STS") != null) {
+			response.put("POL_WF_STS", object.get("POL_WF_STS"));
+		}else {
+			response.put("POL_WF_STS", "");
 		}
 		}catch(Exception e) {
 			response.put("PROPOSAL NO", "");
