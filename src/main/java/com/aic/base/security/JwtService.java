@@ -39,6 +39,7 @@ public class JwtService {
 		Optional<LM_MENU_USERS> userDetail = userrrepo.findByUserId(userName.getUsername());
 
 		claims.put("Role", userDetail.get().getUser_group_id());
+		claims.put("Language", userDetail.get().getUser_dflt_lang_code());
 		return createToken(claims, userName.getUsername());
 	}
 
