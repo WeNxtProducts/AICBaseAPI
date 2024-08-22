@@ -296,14 +296,13 @@ public class LoginServiceImpl implements LoginService {
 
 	                    loginservice.loginToLJMLogs1("User logged in successfully", request, token);
 	                    
-	                    AuthRequest userDetails = jwtService.getLoggedInDetails(token);
 	                    
 	                    Map<String, String> inputMap = new HashMap<>();
-	        			inputMap.put("P_USER", userDetails.getUsername());
-	        			inputMap.put("P_COMP_CODE", userDetails.getCompany());
-	        			inputMap.put("P_DEPT_CODE", userDetails.getDepartment());
-	        			inputMap.put("P_DIV_CODE", userDetails.getDivision());
-	        			inputMap.put("P_BASE_CURR", userDetails.getBaseCurrency());
+	        			inputMap.put("P_USER", auth.getUsername());
+	        			inputMap.put("P_COMP_CODE", auth.getCompany());
+	        			inputMap.put("P_DEPT_CODE", auth.getDepartment());
+	        			inputMap.put("P_DIV_CODE", auth.getDivision());
+	        			inputMap.put("P_BASE_CURR", auth.getBaseCurrency());
 	        			inputMap.put("P_LANG_CODE", "ENG");
 	        			inputMap.put("P_FOR_LANG_CODE", null);
 	        			inputMap.put("P_PROG_NAME", null);
@@ -311,7 +310,7 @@ public class LoginServiceImpl implements LoginService {
 
 	        			ProcedureInput input = new ProcedureInput();
 	        			input.setInParams(inputMap);
-
+	        			
 	        			String url = "http://localhost:8098/" + "common/invokeProcedure?procedureName=" + "P_SET_PARA_VALUES&packageName=WNPKG_VARS";
 	        			HttpHeaders headers = new HttpHeaders();
 	        			RestTemplate restTemplate = new RestTemplate();
