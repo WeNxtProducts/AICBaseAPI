@@ -2,6 +2,8 @@ package com.aic.base.login;
 
 import org.springframework.http.ResponseEntity;
 
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface LoginService {
 
 	public String getCompany(LoginDropDownRequestModel user);
@@ -30,5 +32,9 @@ public interface LoginService {
 	public String getAllDeptSubmit(DeptSubmitRequest deptrequest);
 
 	public String getAllDeptDelete(DeptSubmitRequest request);
+
+	public String expireSession(String userName);
+
+	public ResponseEntity<?> logout(HttpServletRequest request);
 
 }

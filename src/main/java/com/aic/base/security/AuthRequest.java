@@ -13,6 +13,7 @@ public class AuthRequest {
 	private String password;
 	private String division;
 	private String department;
+	private String langCode;
 	private String company;
 	private String baseCurrency;
 	private String role;
@@ -58,7 +59,15 @@ public class AuthRequest {
 	}
 	public void setRole(String role) {
 		this.role = role;
+	}
+	public String getLangCode() {
+		return langCode;
+	}
+	public void setLangCode(String langCode) {
+		this.langCode = langCode;
 	} 
+	
+	
 	
 }
 

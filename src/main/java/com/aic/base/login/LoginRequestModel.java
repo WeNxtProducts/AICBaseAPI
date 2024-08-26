@@ -15,7 +15,7 @@ public class LoginRequestModel {
 	private String divisionCode;
 	
 	private String departmentCode;
-
+	
 	public String getUserName() {
 		return userName;
 	}

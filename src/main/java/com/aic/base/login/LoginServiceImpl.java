@@ -1,5 +1,6 @@
 package com.aic.base.login;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -25,7 +26,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +37,8 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import com.aic.base.commonUtils.LOVDTO;
 import com.aic.base.commonUtils.ProcedureInput;
+import com.aic.base.logHistory.LjmLogActUser;
+import com.aic.base.logHistory.LogActUserRepository;
 import com.aic.base.logHistory.LoginAppenderServiceImpl;
 import com.aic.base.security.AuthRequest;
 import com.aic.base.security.JwtService;
@@ -54,9 +56,6 @@ public class LoginServiceImpl implements LoginService {
 
 	@Autowired
 	private LoginRepository repo;
-
-//	@Autowired
-//	private LoginDao loginDao;
 
 	@Autowired
 	private AuthenticationManager authenticationManager;
@@ -123,10 +122,15 @@ public class LoginServiceImpl implements LoginService {
 
 	@Autowired
 	LmMenuUserCompDivnReposistory lmmenuuserCompdivrepo;
-	
+
 	@Autowired
 	private LoginAppenderServiceImpl loginservice;
 
+	@Autowired
+	private LogActUserRepository actrepo;
+
+	@Autowired
+	private InvalidatedTokenRepository invalidatedTokenRepository;
 
 	@Override
 	public String getCompany(LoginDropDownRequestModel user) {
@@ -250,7 +254,6 @@ public class LoginServiceImpl implements LoginService {
 		return response.toString();
 	}
 
-	@Override
 	public String login(LoginRequestModel login) {
 		JSONObject response = new JSONObject();
 		Map<String, Object> data = new HashMap<>();
@@ -261,82 +264,143 @@ public class LoginServiceImpl implements LoginService {
 		auth.setDivision(login.getDivisionCode());
 		auth.setDepartment(login.getDepartmentCode());
 		auth.setCompany(login.getCompanyCode());
+		auth.setLangCode(login.getLangCode());
 		auth.setBaseCurrency("INR");
 		String token = "";
 
-		try {
-			Authentication authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
-					login.getPassword());
-			Authentication authentication = authenticationManager.authenticate(authenticationToken);
+		HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
 
+		Optional<LjmLogActUser> existingLogin = actrepo.findByLogActUserAndLogActStatus(login.getUserName(), "ACTIVE");
+
+		if (existingLogin.isPresent()) {
+			response.put(statusCode, warningCode);
+			response.put(messageCode, "To continue, should we expire your current session and create a new one?");
+			return response.toString();
+		}
+
+		Authentication authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
+				login.getPassword());
+		Authentication authentication = authenticationManager.authenticate(authenticationToken);
+
+		if (authentication.isAuthenticated()) {
 			token = jwtService.generateToken(auth);
-		
+
 			Optional<LM_MENU_USERS> menuUser = userrepo.findByUserId(login.getUserName());
-			if (authentication.isAuthenticated()) {
-				boolean isFlagSet = checkFlagInMenuTable(authentication); // Check flag in lm_menu table
-				if (isFlagSet) {
-					data.put("Token", token);
-					data.put("URL", "/resetpassword");
-					response.put("Status", "REDIRECT");
-					response.put("status_msg", "Please direct to reset password page");
-					response.put("Data", data);
-					return response.toString();
-				} else {					
-		            
-					if (token != null ) {
-						
-						data.put("Token", token);
-						data.put("group", menuUser.get().getUser_group_id());
-						data.put("MenuList", null);
-						response.put("Status", "SUCCESS");
-						response.put("status_msg", "User Logged In Successfully");
-						response.put("Data", data);
-
-	                    HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-
-	                    loginservice.loginToLJMLogs1("User logged in successfully", request, token);
-	                    
-	                    
-	                    Map<String, String> inputMap = new HashMap<>();
-	        			inputMap.put("P_USER", auth.getUsername());
-	        			inputMap.put("P_COMP_CODE", auth.getCompany());
-	        			inputMap.put("P_DEPT_CODE", auth.getDepartment());
-	        			inputMap.put("P_DIV_CODE", auth.getDivision());
-	        			inputMap.put("P_BASE_CURR", auth.getBaseCurrency());
-	        			inputMap.put("P_LANG_CODE", "ENG");
-	        			inputMap.put("P_FOR_LANG_CODE", null);
-	        			inputMap.put("P_PROG_NAME", null);
-	        			inputMap.put("P_NOOF_DEC", null);
-
-	        			ProcedureInput input = new ProcedureInput();
-	        			input.setInParams(inputMap);
-	        			
-	        			String url = "http://localhost:8098/" + "common/invokeProcedure?procedureName=" + "P_SET_PARA_VALUES&packageName=WNPKG_VARS";
-	        			HttpHeaders headers = new HttpHeaders();
-	        			RestTemplate restTemplate = new RestTemplate();
-	        			headers.setContentType(MediaType.APPLICATION_JSON);
-	        			headers.set("Authorization", "Bearer " + token);
-	        			HttpEntity<ProcedureInput> requestEntity = new HttpEntity<>(input, headers);
-	        			ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
-
-						return response.toString();
-					} else {
-						response.put("Status", "FAILURE");
-						return response.toString();
-					}
-				}
-			} else {
-				response.put("Status", "FAILURE");
+			if (!menuUser.isPresent()) {
+				response.put(statusCode, errorCode);
+				response.put(messageCode, "User not found in menu");
 				return response.toString();
 			}
-		} catch (BadCredentialsException e) {
-			response.put("Status", "FAILURE");
-			response.put("status_msg", "Incorrect password");
+
+			boolean isFlagSet = checkFlagInMenuTable(authentication); // Check flag in lm_menu table
+			if (isFlagSet) {
+				data.put("Token", token);
+				data.put("URL", "/resetpassword");
+				response.put(statusCode, "REDIRECT");
+				response.put(messageCode, "Please direct to reset password page");
+				response.put(dataCode, data);
+				return response.toString();
+			} else {
+				if (token != null || ("EXPIRED".equalsIgnoreCase(existingLogin.get().getLogActStatus())
+						|| "".equalsIgnoreCase(existingLogin.get().getLogActStatus()))) {
+					data.put("Token", token);
+					data.put("group", menuUser.get().getUser_group_id());
+					data.put("MenuList", null); // Update this if MenuList is available
+					response.put(statusCode, successCode);
+					response.put(messageCode, "User Logged In Successfully");
+					response.put(dataCode, data);
+
+					String ipAddress = request.getRemoteAddr();
+					String userAgent = request.getHeader("User-Agent");
+					String browserName = getBrowserName(userAgent);
+
+					// Save new login details
+					LjmLogActUser newLogin = new LjmLogActUser();
+					newLogin.setLogActUser(login.getUserName());
+					newLogin.setLogActIp(ipAddress);
+					newLogin.setLogActHost(request.getRemoteHost());
+					newLogin.setLogActBrowser(browserName);
+					newLogin.setLangCode("ENG");
+					newLogin.setCompanyCode(auth.getCompany());
+					newLogin.setDivisionCode(auth.getDivision());
+					newLogin.setDepartmentCode(auth.getDepartment());
+					newLogin.setBasecurrency("INR");
+					newLogin.setLogActToken(token);
+					newLogin.setLogActStatus("ACTIVE");
+					newLogin.setLogActLoginTime(new Timestamp(System.currentTimeMillis()));
+					newLogin.setLogActCrdt(new Timestamp(System.currentTimeMillis()));
+
+					actrepo.save(newLogin);
+
+					loginservice.loginToLJMLogs1("User logged in successfully", request, token);
+
+					// Include procedure invocation details if needed
+					Map<String, String> inputMap = new HashMap<>();
+					inputMap.put("P_USER", auth.getUsername());
+					inputMap.put("P_COMP_CODE", auth.getCompany());
+					inputMap.put("P_DEPT_CODE", auth.getDepartment());
+					inputMap.put("P_DIV_CODE", auth.getDivision());
+					inputMap.put("P_BASE_CURR", auth.getBaseCurrency());
+					inputMap.put("P_LANG_CODE", "ENG");
+					inputMap.put("P_FOR_LANG_CODE", null);
+					inputMap.put("P_PROG_NAME", null);
+					inputMap.put("P_NOOF_DEC", null);
+
+					ProcedureInput input = new ProcedureInput();
+					input.setInParams(inputMap);
+
+					String url = "http://localhost:8098/common/invokeProcedure?procedureName=P_SET_PARA_VALUES&packageName=WNPKG_VARS";
+					HttpHeaders headers = new HttpHeaders();
+					RestTemplate restTemplate = new RestTemplate();
+					headers.setContentType(MediaType.APPLICATION_JSON);
+					headers.set("Authorization", "Bearer " + token);
+					HttpEntity<ProcedureInput> requestEntity = new HttpEntity<>(input, headers);
+					ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity,
+							String.class);
+
+					return response.toString();
+				} else {
+					response.put(statusCode, errorCode);
+					response.put(messageCode, "Token generation failed");
+					return response.toString();
+				}
+			}
+		} else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "Authentication failed");
 			return response.toString();
-		} catch (UsernameNotFoundException e) {
-			response.put("Status", "FAILURE");
-			response.put("status_msg", "Username not found");
-			return response.toString();
+		}
+
+	}
+	
+
+	private void invalidatePreviousSession(LjmLogActUser oldLogin) {
+	    String beforeToken = oldLogin.getLogActToken();
+	    invalidatedTokenRepository.save(new InvalidatedToken(beforeToken, null));
+//	    oldLogin.setLogActStatus("EXPIRED");
+	    oldLogin.setLogActMddt(new Timestamp(System.currentTimeMillis()));
+	    actrepo.save(oldLogin);
+	}
+
+	private String getBrowserName(String userAgent) {
+		if (userAgent == null) {
+			return "Unknown null";
+		}
+
+		// Simple parsing logic
+		if (userAgent.contains("MSIE") || userAgent.contains("Trident")) {
+			return "Internet Explorer";
+		} else if (userAgent.contains("Firefox")) {
+			return "Mozilla Firefox";
+		} else if (userAgent.contains("Chrome")) {
+			return "Google Chrome";
+		} else if (userAgent.contains("Safari")) {
+			return "Apple Safari";
+		} else if (userAgent.contains("Opera") || userAgent.contains("OPR")) {
+			return "Opera";
+		} else {
+			return "Unknown Browser /API client";
 		}
 	}
 
@@ -741,8 +805,8 @@ public class LoginServiceImpl implements LoginService {
 				response.put(messageCode, "LM menu company created successfully");
 			}
 
-			LM_MENU_USER_COMP_DIVN existingCompDivn = lmmenuuserCompdivrepo
-					.findByuserIdAndCompCode(divnUserId, divnCompCode);
+			LM_MENU_USER_COMP_DIVN existingCompDivn = lmmenuuserCompdivrepo.findByuserIdAndCompCode(divnUserId,
+					divnCompCode);
 			if (existingCompDivn != null) {
 				Optional<LM_MENU_USERS> user = userrepo.findById(userId);
 				if (user.get() != null) {
@@ -814,6 +878,69 @@ public class LoginServiceImpl implements LoginService {
 		}
 
 		return response.toString();
+	}
+
+	public String expireSession(String userName) {
+		JSONObject response = new JSONObject();
+
+		try {
+			// Check for existing active tokens
+			Optional<LjmLogActUser> existingLogin = actrepo.findByLogActUserAndLogActStatus(userName, "ACTIVE");
+
+			if (existingLogin.isPresent()) {
+				
+				String beforeToken= existingLogin.get().getLogActToken();
+			
+				
+
+				invalidatedTokenRepository.save(new InvalidatedToken(beforeToken, null));
+
+				// Expire the old session
+				LjmLogActUser oldLogin = existingLogin.get();
+				 invalidateTokens(oldLogin.getLogActToken());
+				oldLogin.setLogActStatus("EXPIRED");
+				oldLogin.setLogActMddt(new Timestamp(System.currentTimeMillis())); // Update modification date
+
+				actrepo.save(oldLogin);
+
+				response.put(statusCode, successCode);
+				response.put(messageCode, "Session expired successfully.");
+			} else {
+				response.put(statusCode, errorCode);
+				response.put(messageCode, "No active session found for the user.");
+			}
+		} catch (Exception e) {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "An error occurred: " + e.getMessage());
+		}
+
+		return response.toString();
+	}
+
+	private void invalidateTokens(String logActToken) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	public ResponseEntity<?> logout(HttpServletRequest request) {
+		String token = jwtService.extractTokenFromHeader(request);
+		JSONObject response = new JSONObject();
+
+		if (token != null) {
+
+			invalidatedTokenRepository.save(new InvalidatedToken(token, null));
+
+			String userName = jwtService.extractUsername(token);
+			expireSession(userName);
+			response.put(statusCode, successCode);
+			response.put(messageCode, "Logout successful");
+			return ResponseEntity.ok().body(response.toString());
+		} else {
+
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "No token provided");
+			return ResponseEntity.badRequest().body(response.toString());
+		}
 	}
 
 }

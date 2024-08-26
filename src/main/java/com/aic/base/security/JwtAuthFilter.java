@@ -10,6 +10,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.aic.base.login.InvalidatedTokenRepository;
+
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -24,6 +26,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 	@Autowired
 	private UserInfoService userDetailsService;
+	
+	@Autowired
+    private InvalidatedTokenRepository invalidatedTokenRepository;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -38,6 +43,11 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 				username = jwtService.extractUsername(token);
 			}
 
+			if (token != null && invalidatedTokenRepository.existsByToken(token)) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED); // Set HTTP 401 Unauthorized status
+                response.getWriter().write("JWT token has been invalidated.");
+                return;
+            }
 			if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 				UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 				if (jwtService.validateToken(token, userDetails)) {
