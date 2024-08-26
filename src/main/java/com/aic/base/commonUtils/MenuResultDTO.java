@@ -31,6 +31,8 @@ public class MenuResultDTO {
 	private Integer ds_type;
 	
 	private String ds_code;
+	
+	private String POL_CLASS_CODE;
 
 	public String getMenuId() {
 		return menuId;
@@ -134,6 +136,14 @@ public class MenuResultDTO {
 
 	public void setDs_code(String ds_code) {
 		this.ds_code = ds_code;
+	}
+
+	public String getPOL_CLASS_CODE() {
+		return POL_CLASS_CODE;
+	}
+
+	public void setPOL_CLASS_CODE(String pOL_CLASS_CODE) {
+		POL_CLASS_CODE = pOL_CLASS_CODE;
 	}
 
 }

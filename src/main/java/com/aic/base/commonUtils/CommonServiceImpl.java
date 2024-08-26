@@ -1189,6 +1189,7 @@ public class CommonServiceImpl implements CommonService {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
 					.withProcedureName(procedureName);
 			try {
+				System.out.println(procedureInput.getInParams());
 				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
 
 				response.put(statusCode, successCode);
@@ -1634,6 +1635,12 @@ public class CommonServiceImpl implements CommonService {
 			response.put("POL_WF_STS", object.get("POL_WF_STS"));
 		}else {
 			response.put("POL_WF_STS", "");
+		}
+		
+		if(object.get("POL_STATUS") != null) {
+			response.put("POL_STATUS", object.get("POL_STATUS"));
+		}else {
+			response.put("POL_STATUS", "");
 		}
 		}catch(Exception e) {
 			response.put("PROPOSAL NO", "");
