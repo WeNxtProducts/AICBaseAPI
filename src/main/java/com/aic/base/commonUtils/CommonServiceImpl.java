@@ -1625,19 +1625,18 @@ public class CommonServiceImpl implements CommonService {
 		response.put(messageCode, "Policy Details Fetched Successfully");
 		response.put(dataCode, obj);
 		try {
-		if(object.get("POL_NO") != null) {
+			if(object.opt("POL_WF_STS") != null) {
+				response.put("POL_WF_STS", object.get("POL_WF_STS"));
+			}else {
+				response.put("POL_WF_STS", "");
+			}
+		if(object.opt("POL_NO") != null) {
 		response.put("PROPOSAL_NO", object.get("POL_NO"));
 		}else {
 			response.put("PROPOSAL_NO", "");	
 		}
 		
-		if(object.get("POL_WF_STS") != null) {
-			response.put("POL_WF_STS", object.get("POL_WF_STS"));
-		}else {
-			response.put("POL_WF_STS", "");
-		}
-		
-		if(object.get("POL_STATUS") != null) {
+		if(object.opt("POL_STATUS") != null) {
 			response.put("POL_STATUS", object.get("POL_STATUS"));
 		}else {
 			response.put("POL_STATUS", "");
