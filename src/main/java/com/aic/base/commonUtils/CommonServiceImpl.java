@@ -406,7 +406,7 @@ public class CommonServiceImpl implements CommonService {
 			String[] headingNames = headString.split(",");
 
 			for (String headingName : headingNames) {
-				heading.put(headingName.trim(), headingName.trim());
+				heading.put(headingName.trim(), headingName.replace('_', ' ').trim());
 			}
 			queryResult.get(0).remove("Head");
 			ObjectMapper objectMapper = new ObjectMapper();
@@ -498,7 +498,7 @@ public class CommonServiceImpl implements CommonService {
 		String[] headingNames = headString.split(",");
 
 		for (String headingName : headingNames) {
-			heading.put(headingName.trim(), headingName.trim());
+			heading.put(headingName.trim(), headingName.replace('_', ' ').trim());
 		}
 		queryResult.get(0).remove("Head");
 		ObjectMapper objectMapper = new ObjectMapper();
