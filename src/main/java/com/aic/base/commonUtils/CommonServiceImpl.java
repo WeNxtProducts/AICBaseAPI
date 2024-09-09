@@ -1641,6 +1641,13 @@ public class CommonServiceImpl implements CommonService {
 		}else {
 			response.put("POL_STATUS", "");
 		}
+		
+		if(object.opt("POL_PREM_CALC_YN") != null) {
+			response.put("POL_PREM_CALC_YN", object.get("POL_PREM_CALC_YN"));
+		}else {
+			response.put("POL_PREM_CALC_YN", "");
+		}
+		
 		}catch(Exception e) {
 			response.put("PROPOSAL NO", "");
 		}
