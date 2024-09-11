@@ -1742,4 +1742,43 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	}
 
+	@Override
+	public String newMrvListing(HttpServletRequest request, MrvRequestDTO mrvRequestDto) {
+		JSONObject response = new JSONObject();
+		Map<String, Object> parames = processParamLOV(null, request);
+
+		QUERY_MASTER query = commonDao.getQueryLov(mrvRequestDto.getQueryId());
+		Map<String, Object> parameters = new HashMap<>();
+		parameters.put("tranId", mrvRequestDto.getTranId());
+		parameters.put("emptranId", mrvRequestDto.getEmptranId());
+		List<Map<String, Object>> queryResult = commonDao.newMrvListing(query.getQM_QUERY(), parameters);
+		Map<String, Object> firstRow = queryResult.get(0);
+		Set<String> columnNames = firstRow.keySet();
+		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
+		String headString = (String) firstRow.get("Head");
+
+		String[] headingNames = headString.split(",");
+
+		for (String headingName : headingNames) {
+			heading.put(headingName.trim(), headingName.replace('_', ' ').trim());
+		}
+		queryResult.get(0).remove("Head");
+		ObjectMapper objectMapper = new ObjectMapper();
+		String jsonString = "";
+		try {
+			jsonString = objectMapper.writeValueAsString(heading);
+		} catch (JsonProcessingException e) {
+			e.printStackTrace();
+		}
+		JSONObject headingJson = new JSONObject(jsonString);
+		response.put("Heading", jsonString);
+		response.put(statusCode, successCode);
+		if(queryResult.size() >= 1) {
+		response.put(dataCode, queryResult);
+		}else {
+			response.put(dataCode, new ArrayList<>());
+		}
+
+		return response.toString();
+	}
 }

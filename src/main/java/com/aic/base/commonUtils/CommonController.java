@@ -67,6 +67,11 @@ public class CommonController {
 		return service.getMrvListing(request);
 	}
 	
+	@PostMapping("/newMrvListing")
+	public String newMrvListing(HttpServletRequest request, @RequestBody MrvRequestDTO mrvRequestDto) {
+		return service.newMrvListing(request, mrvRequestDto);
+	}
+	
 //	@GetMapping("/getfield")
 //	public String getFieldList(HttpServletRequest request) {
 //		try {

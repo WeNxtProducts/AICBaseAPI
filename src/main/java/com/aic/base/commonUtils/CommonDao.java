@@ -49,4 +49,6 @@ public interface CommonDao {
 
 	List<Map<String, Object>> getMapQuery(String string, Map<String, Object> map);
 
+	List<Map<String, Object>> newMrvListing(String qm_QUERY, Map<String, Object> parameters);
+
 }

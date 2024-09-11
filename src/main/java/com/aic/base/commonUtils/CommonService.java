@@ -108,4 +108,6 @@ public interface CommonService {
 
 	public String polConditionEdit(HttpServletRequest request);
 
+	public String newMrvListing(HttpServletRequest request, MrvRequestDTO mrvRequestDto);
+
 }

@@ -168,6 +168,12 @@ public class CommonDaoImpl implements CommonDao {
 
 		return rows;
 	}
+
+	@Override
+	public List<Map<String, Object>> newMrvListing(String query, Map<String, Object> parameters) {
+		List<Map<String, Object>> result = namedTemplate.queryForList(query, parameters);
+		return result;
+	}
 	
 	
 
