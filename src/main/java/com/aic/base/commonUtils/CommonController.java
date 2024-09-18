@@ -57,6 +57,11 @@ public class CommonController {
 		return service.getQueryParamLOV(request);
 	}
 	
+	@GetMapping("/newparamlov")
+	public String newQueryParamLov(HttpServletRequest request, @RequestBody ParamLovRequestDTO paramLovRequestDTO) {
+		return service.newQueryParamLOV(request, paramLovRequestDTO);
+	}
+	
 	@GetMapping("/getlistingdata")
 	public String getListingData(HttpServletRequest request) {
 		return service.getListingData(request);
@@ -383,6 +388,11 @@ public class CommonController {
 				e.printStackTrace();
 				return e.getMessage();
 			}
+	}
+	
+	@PostMapping("/rulesJson")
+	public String generateRulesJson(@RequestBody RulesJsonRequest rulesJsonRequest, HttpServletRequest request) {
+		return service.generateRulesJson(rulesJsonRequest, request);
 	}
 
 }

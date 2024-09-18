@@ -55,6 +55,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.aic.base.logging.LoggerFunction;
+import com.aic.base.model.LM_USER_APPR_SETUP_DET;
 import com.aic.base.model.index.ClaimHdrIndex;
 import com.aic.base.users.LM_MENU_USERS;
 import com.aic.base.users.UserIndex;
@@ -78,6 +79,9 @@ public class CommonServiceImpl implements CommonService {
 
 	@Autowired
 	private AppExceptionRepository exceptionRepo;
+	
+	@Autowired
+	private UserApprSetupRepository userApprSetupRepo;
 
 	@Autowired
 	private CommonDao commonDao;
@@ -384,6 +388,38 @@ public class CommonServiceImpl implements CommonService {
 	}
 	return response.toString();
 	}
+	
+	@Override
+	public String newQueryParamLOV(HttpServletRequest request, ParamLovRequestDTO paramLovRequestDTO) {
+		Map<String, Object> params = processParamLOV(null, request);
+//	int queryId = Integer.parseInt(((String) params.get("queryId")));
+	params.remove(paramLovRequestDTO.getQueryId());
+	JSONObject response = new JSONObject();
+	QUERY_MASTER query = commonDao.getQueryLov(paramLovRequestDTO.getQueryId());
+	if (query != null) {
+		if (query.getQM_QUERY_TYPE().equals("lov")) {
+			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
+			response.put(statusCode, successCode);
+			response.put(dataCode, queryResult);
+		} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
+//			List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
+//			Map<String, Object> paramsMap = processParamLOV(queryParams, request);
+//			paramsMap.remove("queryId");
+			Map<String, Object> parameters = new HashMap<>();
+			parameters.put("searchTerm", paramLovRequestDTO.getSearchTerm());
+			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), parameters);
+			JSONObject responseData = new JSONObject();
+			responseData.put(query.getQM_QUERY_NAME(), queryResult);
+			response.put(statusCode, successCode);
+			response.put(dataCode, responseData);
+		}
+	} else {
+		response.put(statusCode, errorCode);
+		response.put(messageCode, getLovWrongId);
+	}
+	return response.toString();
+	}
+
 
 	@Override
 	public String getListingData(HttpServletRequest request) {
@@ -1171,7 +1207,6 @@ public class CommonServiceImpl implements CommonService {
 				if (outParams.size() > 0) {
 					response.put(statusCode, successCode);
 					response.put(dataCode, outParams);
-					response.put(messageCode, "Procedure excuted successfully");
 					if(outParams.get("P_SUCC_YN").equals("N")) {
 						response.put(statusCode, errorCode);
 						response.put(messageCode, outParams.get("P_ERR_MSG"));
@@ -1768,7 +1803,7 @@ public class CommonServiceImpl implements CommonService {
 		String jsonString = "";
 		try {
 			jsonString = objectMapper.writeValueAsString(heading);
-		} catch (JsonProcessingException e) {
+		} catch (JsonProcessingException e) { 
 			e.printStackTrace();
 		}
 		JSONObject headingJson = new JSONObject(jsonString);
@@ -1781,5 +1816,27 @@ public class CommonServiceImpl implements CommonService {
 		}
 
 		return response.toString();
+	}
+
+	@Override
+	public String generateRulesJson(RulesJsonRequest rulesJsonRequest, HttpServletRequest request) {
+		JSONObject result = new JSONObject();
+		JSONObject moduleLevel = new JSONObject();
+		JSONObject userLevel = new JSONObject();
+		
+		HashMap<Object, Object> validationFields = new HashMap<>();
+		
+		List<LM_USER_APPR_SETUP_DET> userSetup = userApprSetupRepo.getSetup(rulesJsonRequest.getUserId(), rulesJsonRequest.getModuleId());
+		
+		for(LM_USER_APPR_SETUP_DET setup : userSetup) {
+			validationFields.put(setup.getASD_CODE(), setup);
+		}
+		
+		userLevel.put(rulesJsonRequest.getUserId(), validationFields);
+		moduleLevel.put(rulesJsonRequest.getModuleId(), userLevel);
+
+		result.put("Data", moduleLevel);
+
+		return result.toString();
 	}
 }
