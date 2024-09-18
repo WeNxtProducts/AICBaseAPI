@@ -1171,6 +1171,7 @@ public class CommonServiceImpl implements CommonService {
 				if (outParams.size() > 0) {
 					response.put(statusCode, successCode);
 					response.put(dataCode, outParams);
+					response.put(messageCode, "Procedure excuted successfully");
 					if(outParams.get("P_SUCC_YN").equals("N")) {
 						response.put(statusCode, errorCode);
 						response.put(messageCode, outParams.get("P_ERR_MSG"));
