@@ -8,7 +8,7 @@ public class MrvRequestDTO {
 	private Integer queryId;
 
 	@JsonProperty("tranId")
-	private Integer tranId;
+	private Object tranId;
 
 	@JsonProperty("emptranId")
 	private String emptranId;
@@ -21,11 +21,11 @@ public class MrvRequestDTO {
 		this.queryId = queryId;
 	}
 
-	public Integer getTranId() {
+	public Object getTranId() {
 		return tranId;
 	}
 
-	public void setTranId(Integer tranId) {
+	public void setTranId(Object tranId) {
 		this.tranId = tranId;
 	}
 
