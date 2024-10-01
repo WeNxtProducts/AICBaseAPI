@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,6 +56,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import com.aic.base.logging.LoggerFunction;
+import com.aic.base.model.LM_PRODUCT;
 import com.aic.base.model.LM_USER_APPR_SETUP_DET;
 import com.aic.base.model.index.ClaimHdrIndex;
 import com.aic.base.users.LM_MENU_USERS;
@@ -82,6 +84,9 @@ public class CommonServiceImpl implements CommonService {
 	
 	@Autowired
 	private UserApprSetupRepository userApprSetupRepo;
+	
+	@Autowired
+	private LmProductRepository productRepo;
 
 	@Autowired
 	private CommonDao commonDao;
@@ -112,7 +117,6 @@ public class CommonServiceImpl implements CommonService {
 
 	@Value("${spring.crud.url}")
 	private String baseCrudPath;
-	
 	
 	@Value("${spring.docprint.url}")
 	private String baseDocPath;
@@ -1823,20 +1827,65 @@ public class CommonServiceImpl implements CommonService {
 		JSONObject result = new JSONObject();
 		JSONObject moduleLevel = new JSONObject();
 		JSONObject userLevel = new JSONObject();
+		Map<String, Map<String, LM_USER_APPR_SETUP_DET>> data = new HashMap<>();
+//		Map<String, String> innerData = new HashMap<>();
 		
 		HashMap<Object, Object> validationFields = new HashMap<>();
 		
-		List<LM_USER_APPR_SETUP_DET> userSetup = userApprSetupRepo.getSetup(rulesJsonRequest.getUserId(), rulesJsonRequest.getModuleId());
+		List<LM_USER_APPR_SETUP_DET> userSetup = userApprSetupRepo.getSetup(rulesJsonRequest.getUserId());
 		
 		for(LM_USER_APPR_SETUP_DET setup : userSetup) {
-			validationFields.put(setup.getASD_CODE(), setup);
+//			System.out.println(setup.getASD_CODE());
+			if(setup.getASD_FM_PROD_CODE().equals("0") && setup.getASD_TO_PROD_CODE().equals("zzzzzzzzzzzz")) {
+				if(data.get("ALL") != null) {
+					Map<String, LM_USER_APPR_SETUP_DET> innerData = data.get("ALL");
+					innerData.put(setup.getASD_CODE(), setup);
+					data.replace("ALL", innerData);
+				}else {
+					Map<String, LM_USER_APPR_SETUP_DET> innerData = new HashMap<>();
+					innerData.put(setup.getASD_CODE(), setup);
+					data.put("ALL", innerData);
+				}
+			}else {
+				if(data.get(setup.getASD_FM_PROD_CODE()) != null) {
+					Map<String, LM_USER_APPR_SETUP_DET> innerData = data.get(setup.getASD_FM_PROD_CODE());
+					innerData.put(setup.getASD_CODE(), setup);
+					data.replace(setup.getASD_FM_PROD_CODE(), innerData);
+				}else {
+					Map<String, LM_USER_APPR_SETUP_DET> innerData = new HashMap<>();
+					innerData.put(setup.getASD_CODE(), setup);
+					data.put(setup.getASD_FM_PROD_CODE(), innerData);
+				}
+			}
 		}
-		
-		userLevel.put(rulesJsonRequest.getUserId(), validationFields);
-		moduleLevel.put(rulesJsonRequest.getModuleId(), userLevel);
 
-		result.put("Data", moduleLevel);
+		result.put("Data", data);
 
 		return result.toString();
+	}
+
+	@Override
+	public String generateBoundaryConds(RulesJsonRequest rulesJsonRequest, HttpServletRequest request)throws Exception {
+		JSONObject response = new JSONObject();
+		JSONObject model = new JSONObject();
+		
+		Optional<LM_PRODUCT> product = productRepo.findById(rulesJsonRequest.getProdCode());
+		LM_PRODUCT prod = product.get();
+		if(prod!=null) {
+			for (int i = 0; i < prod.getClass().getDeclaredFields().length; i++) {
+				Field field = prod.getClass().getDeclaredFields()[i];
+				field.setAccessible(true);
+				String columnName = null;
+				if (field.isAnnotationPresent(Column.class)) {
+					Annotation annotation = field.getAnnotation(Column.class);
+					Column column = (Column) annotation;
+					Object value = field.get(prod);
+					columnName = column.name();
+					response.put(columnName, value);
+				}
+			}
+		}
+		model.put(dataCode, response);
+		return model.toString();
 	}
 }

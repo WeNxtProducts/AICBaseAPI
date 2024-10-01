@@ -114,4 +114,6 @@ public interface CommonService {
 
 	public String newQueryParamLOV(HttpServletRequest request, ParamLovRequestDTO paramLovRequestDTO);
 
+	public String generateBoundaryConds(RulesJsonRequest rulesJsonRequest, HttpServletRequest request) throws Exception;
+
 }

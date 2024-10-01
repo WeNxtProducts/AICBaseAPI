@@ -12,7 +12,7 @@ import com.aic.base.model.LM_USER_APPR_SETUP_DET;
 @Repository
 public interface UserApprSetupRepository extends JpaRepository<LM_USER_APPR_SETUP_DET, Integer>{
 
-	@Query("SELECT e FROM LM_USER_APPR_SETUP_DET e WHERE e.ASD_USER_ID = :userId AND e.ASD_MODULE_ID = :moduleId")
-	List<LM_USER_APPR_SETUP_DET> getSetup(@Param("userId") String userId, @Param("moduleId") String moduleId);
+	@Query("SELECT e FROM LM_USER_APPR_SETUP_DET e WHERE e.ASD_USER_ID = :userId")
+	List<LM_USER_APPR_SETUP_DET> getSetup(@Param("userId") String userId);
 
 }

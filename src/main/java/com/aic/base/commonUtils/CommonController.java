@@ -394,5 +394,13 @@ public class CommonController {
 	public String generateRulesJson(@RequestBody RulesJsonRequest rulesJsonRequest, HttpServletRequest request) {
 		return service.generateRulesJson(rulesJsonRequest, request);
 	}
-
+	
+	@PostMapping("/boundaryConds")
+	public String boundaryConds(@RequestBody RulesJsonRequest rulesJsonRequest, HttpServletRequest request) {
+		try {
+		return service.generateBoundaryConds(rulesJsonRequest, request);
+		}catch(Exception e) {
+			return e.getMessage();
+		}
+	}
 }

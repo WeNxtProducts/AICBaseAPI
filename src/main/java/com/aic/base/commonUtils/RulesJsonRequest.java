@@ -5,6 +5,8 @@ public class RulesJsonRequest {
 	private String userId;
 	
 	private String moduleId;
+	
+	private String prodCode;
 
 	public String getUserId() {
 		return userId;
@@ -20,6 +22,14 @@ public class RulesJsonRequest {
 
 	public void setModuleId(String moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	public String getProdCode() {
+		return prodCode;
+	}
+
+	public void setProdCode(String prodCode) {
+		this.prodCode = prodCode;
 	}
 
 }
