@@ -5,34 +5,53 @@ import java.util.List;
 import org.json.JSONObject;
 
 public class MenuResultDTO {
-	
+
 	private String menuId;
-	
+
 	private String menuScreenName;
-	
+
 	private String menuOptionDesc;
-	
+
 	private String menuAction;
-	
+
 	private String menuActionType;
-	
+
 	private String menuParentId;
-	
+
 	private String menuDispSeqNo;
-	
+
 	private String menuURL;
-	
+
 	private List<?> childrens;
-	
+
 	private String listingQueryId;
-	
+
 	private String menuIconPath;
-	
+
 	private Integer ds_type;
-	
+
 	private String ds_code;
-	
+
 	private String POL_CLASS_CODE;
+
+	private String repId;
+
+	private String repName;
+
+	private String repMenuFlag;
+
+	private String repParentId;
+	
+	private String repAdds1;
+
+	
+	public String getRepAdds1() {
+		return repAdds1;
+	}
+
+	public void setRepAdds1(String repAdds1) {
+		this.repAdds1 = repAdds1;
+	}
 
 	public String getMenuId() {
 		return menuId;
@@ -144,6 +163,38 @@ public class MenuResultDTO {
 
 	public void setPOL_CLASS_CODE(String pOL_CLASS_CODE) {
 		POL_CLASS_CODE = pOL_CLASS_CODE;
+	}
+
+	public String getRepId() {
+		return repId;
+	}
+
+	public void setRepId(String repId) {
+		this.repId = repId;
+	}
+
+	public String getRepName() {
+		return repName;
+	}
+
+	public void setRepName(String repName) {
+		this.repName = repName;
+	}
+
+	public String getRepMenuFlag() {
+		return repMenuFlag;
+	}
+
+	public void setRepMenuFlag(String repMenuFlag) {
+		this.repMenuFlag = repMenuFlag;
+	}
+
+	public String getRepParentId() {
+		return repParentId;
+	}
+
+	public void setRepParentId(String repParentId) {
+		this.repParentId = repParentId;
 	}
 
 }
