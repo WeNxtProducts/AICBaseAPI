@@ -17,9 +17,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,6 +39,7 @@ import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -84,10 +83,10 @@ public class CommonServiceImpl implements CommonService {
 
 	@Autowired
 	private AppExceptionRepository exceptionRepo;
-	
+
 	@Autowired
 	private UserApprSetupRepository userApprSetupRepo;
-	
+
 	@Autowired
 	private LmProductRepository productRepo;
 
@@ -120,7 +119,7 @@ public class CommonServiceImpl implements CommonService {
 
 	@Value("${spring.crud.url}")
 	private String baseCrudPath;
-	
+
 	@Value("${spring.docprint.url}")
 	private String baseDocPath;
 
@@ -268,30 +267,42 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
+
 	public String getMenuList(String groupId, HttpServletRequest request) {
 		JSONObject response = new JSONObject();
+
 		QUERY_MASTER query = commonDao.getQueryLov(14);
 		List<MenuResultDTO> list = (List<MenuResultDTO>) commonDao.getMenuList(groupId, query.getQM_QUERY());
 		List<MenuResultDTO> finalResult = new ArrayList<>();
-		List<MenuResultDTO> child = new ArrayList<>();
 		QUERY_MASTER childQuery = commonDao.getQueryLov(15);
-		if (list.size() >= 1) {
+
+		if (list != null && !list.isEmpty()) {
 			response.put(statusCode, successCode);
 			response.put(messageCode, "Menu List Fetched Successfully");
+
 			for (MenuResultDTO data : list) {
-				if (data.getMenuParentId().equals("*")) {
-					child = (List<MenuResultDTO>) commonDao.getChildMenuList(data.getMenuId(), groupId,
-							childQuery.getQM_QUERY());
-					if (child.size() >= 1) {
+				if ("*".equals(data.getMenuParentId())) {
+
+					List<MenuResultDTO> child = (List<MenuResultDTO>) commonDao.getChildMenuList(data.getMenuId(),
+							groupId, childQuery.getQM_QUERY());
+
+					if ("**".equals(data.getMenuAction())) {
+
+						List<MenuResultDTO> reportList = getReportMenuListAsList();
+						data.setChildrens(reportList);
+					} else if (child != null && !child.isEmpty()) {
+
 						data.setChildrens(child);
-						finalResult.add(data);
-					} else {
-						finalResult.add(data);
 					}
+					finalResult.add(data);
 				}
 			}
-			response.put("Data", finalResult);
+			response.put(dataCode, finalResult);
+		} else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "No Menu Data Available");
 		}
+
 		return response.toString();
 	}
 
@@ -370,45 +381,45 @@ public class CommonServiceImpl implements CommonService {
 	@Override
 	public String getQueryParamLOV(HttpServletRequest request) {
 		Map<String, Object> params = processParamLOV(null, request);
-	int queryId = Integer.parseInt(((String) params.get("queryId")));
-	params.remove("queryId");
-	JSONObject response = new JSONObject();
-	QUERY_MASTER query = commonDao.getQueryLov(queryId);
-	if (query != null) {
-		if (query.getQM_QUERY_TYPE().equals("lov")) {
-			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
-			response.put(statusCode, successCode);
-			response.put(dataCode, queryResult);
-		} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
-			List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
-			Map<String, Object> paramsMap = processParamLOV(queryParams, request);
-			paramsMap.remove("queryId");
-			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
-			JSONObject responseData = new JSONObject();
-			responseData.put(query.getQM_QUERY_NAME(), queryResult);
-			response.put(statusCode, successCode);
-			response.put(dataCode, responseData);
+		int queryId = Integer.parseInt(((String) params.get("queryId")));
+		params.remove("queryId");
+		JSONObject response = new JSONObject();
+		QUERY_MASTER query = commonDao.getQueryLov(queryId);
+		if (query != null) {
+			if (query.getQM_QUERY_TYPE().equals("lov")) {
+				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
+				response.put(statusCode, successCode);
+				response.put(dataCode, queryResult);
+			} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
+				List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
+				Map<String, Object> paramsMap = processParamLOV(queryParams, request);
+				paramsMap.remove("queryId");
+				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), paramsMap);
+				JSONObject responseData = new JSONObject();
+				responseData.put(query.getQM_QUERY_NAME(), queryResult);
+				response.put(statusCode, successCode);
+				response.put(dataCode, responseData);
+			}
+		} else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, getLovWrongId);
 		}
-	} else {
-		response.put(statusCode, errorCode);
-		response.put(messageCode, getLovWrongId);
+		return response.toString();
 	}
-	return response.toString();
-	}
-	
+
 	@Override
 	public String newQueryParamLOV(HttpServletRequest request, ParamLovRequestDTO paramLovRequestDTO) {
 		Map<String, Object> params = processParamLOV(null, request);
 //	int queryId = Integer.parseInt(((String) params.get("queryId")));
-	params.remove(paramLovRequestDTO.getQueryId());
-	JSONObject response = new JSONObject();
-	QUERY_MASTER query = commonDao.getQueryLov(paramLovRequestDTO.getQueryId());
-	if (query != null) {
-		if (query.getQM_QUERY_TYPE().equals("lov")) {
-			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
-			response.put(statusCode, successCode);
-			response.put(dataCode, queryResult);
-		} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
+		params.remove(paramLovRequestDTO.getQueryId());
+		JSONObject response = new JSONObject();
+		QUERY_MASTER query = commonDao.getQueryLov(paramLovRequestDTO.getQueryId());
+		if (query != null) {
+			if (query.getQM_QUERY_TYPE().equals("lov")) {
+				List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), new HashMap());
+				response.put(statusCode, successCode);
+				response.put(dataCode, queryResult);
+			} else if (query.getQM_QUERY_TYPE().equals("paramlov")) {
 //			List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(query.getQM_SYS_ID());
 //			Map<String, Object> paramsMap = processParamLOV(queryParams, request);
 //			paramsMap.remove("queryId");
@@ -421,14 +432,13 @@ public class CommonServiceImpl implements CommonService {
 			responseData.put(query.getQM_QUERY_NAME(), queryResult);
 			response.put(statusCode, successCode);
 			response.put(dataCode, responseData);
+			}
+		} else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, getLovWrongId);
 		}
-	} else {
-		response.put(statusCode, errorCode);
-		response.put(messageCode, getLovWrongId);
+		return response.toString();
 	}
-	return response.toString();
-	}
-
 
 	@Override
 	public String getListingData(HttpServletRequest request) {
@@ -556,9 +566,9 @@ public class CommonServiceImpl implements CommonService {
 		JSONObject headingJson = new JSONObject(jsonString);
 		response.put("Heading", jsonString);
 		response.put(statusCode, successCode);
-		if(queryResult.size() >= 1) {
-		response.put(dataCode, queryResult);
-		}else {
+		if (queryResult.size() >= 1) {
+			response.put(dataCode, queryResult);
+		} else {
 			response.put(dataCode, new ArrayList<>());
 		}
 
@@ -899,60 +909,59 @@ public class CommonServiceImpl implements CommonService {
 
 		String documentName = "users";
 		JSONObject response = new JSONObject();
-		
+
 		SearchHit[] searchHits = elasticSearch(documentName, request);
 		Map<String, Object> params = processParamLOV(null, request);
 
 		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
 		String jsonString = "";
-		
+
 		QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(params.get("queryId").toString()));
 		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
 				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
-		
+
 		List<Map<String, Object>> finalResult = new ArrayList<>();
 		Map<String, Object> finalMap = new HashMap<>();
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
-		UserIndex user = new UserIndex();
-		Class classs = user.getClass();
-		Map<String, Object> firstRow = queryResult.get(0);
-		Set<String> columnNames = firstRow.keySet();
-		String headString = (String) firstRow.get("Head");
+			UserIndex user = new UserIndex();
+			Class classs = user.getClass();
+			Map<String, Object> firstRow = queryResult.get(0);
+			Set<String> columnNames = firstRow.keySet();
+			String headString = (String) firstRow.get("Head");
 
-		String[] headingNames = headString.split(",");
-		for (String headingName : headingNames) {
-			heading.put(headingName.trim(), headingName.trim());
-		}
-		jsonString = mapper.writeValueAsString(heading);
-		for (SearchHit hit : searchHits) {
-			finalMap = new HashMap<>();
-			user = new UserIndex();
-			mapper.registerModule(new JavaTimeModule());
-			String documentId = hit.getId();
-			String sourceAsString = hit.getSourceAsString();
-			user = mapper.readValue(sourceAsString, UserIndex.class);
-			for (String headings : headingNames) {
-				String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
-						+ headings.substring(1, headings.length());
-				Method setter = classs.getMethod(setterMethodName);
-				Object value = setter.invoke(user);
-				finalMap.put(headings.trim(), value);
+			String[] headingNames = headString.split(",");
+			for (String headingName : headingNames) {
+				heading.put(headingName.trim(), headingName.trim());
 			}
-			finalResult.add(finalMap);
-		}
-		response.put("Count", searchHits.length);
-		response.put("Heading", jsonString);
-		response.put(statusCode, successCode);
-		response.put(dataCode, finalResult);
-		
-		return response.toString();
-		}catch(Exception e) {
+			jsonString = mapper.writeValueAsString(heading);
+			for (SearchHit hit : searchHits) {
+				finalMap = new HashMap<>();
+				user = new UserIndex();
+				mapper.registerModule(new JavaTimeModule());
+				String documentId = hit.getId();
+				String sourceAsString = hit.getSourceAsString();
+				user = mapper.readValue(sourceAsString, UserIndex.class);
+				for (String headings : headingNames) {
+					String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
+							+ headings.substring(1, headings.length());
+					Method setter = classs.getMethod(setterMethodName);
+					Object value = setter.invoke(user);
+					finalMap.put(headings.trim(), value);
+				}
+				finalResult.add(finalMap);
+			}
+			response.put("Count", searchHits.length);
+			response.put("Heading", jsonString);
+			response.put(statusCode, successCode);
+			response.put(dataCode, finalResult);
+
+			return response.toString();
+		} catch (Exception e) {
 			return e.getMessage();
 		}
-
 
 	}
 
@@ -1020,7 +1029,7 @@ public class CommonServiceImpl implements CommonService {
 		try {
 			SearchResponse searchResponse = client.search(req, RequestOptions.DEFAULT);
 			SearchHit[] searchHits = searchResponse.getHits().getHits();
-			
+
 //			UserIndex user = new UserIndex();
 //			Class classs = user.getClass();
 //			Map<String, Object> firstRow = queryResult.get(0);
@@ -1057,7 +1066,7 @@ public class CommonServiceImpl implements CommonService {
 			e.printStackTrace();
 			return null;
 		}
-		
+
 //		return response.toString();
 	}
 
@@ -1105,8 +1114,6 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	}
 
-	
-	
 	@Override
 	public String claimCheckListEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1135,8 +1142,7 @@ public class CommonServiceImpl implements CommonService {
 		String authorizationHeader = request.getHeader("Authorization");
 		String token = authorizationHeader.substring(7).trim();
 		Map<String, Object> params = processParamLOV(null, request);
-		
-		
+
 		String url = baseDocPath + "docprintsetup/getDocPrintSetupbyid?dpsSysid=" + params.get("tranId");
 		HttpHeaders headers = new HttpHeaders();
 		RestTemplate restTemplate = new RestTemplate();
@@ -1193,78 +1199,78 @@ public class CommonServiceImpl implements CommonService {
 			Map<String, Object> inputs = new HashMap<>(procedureInput.getInParams());
 
 			for (String param : procedureInput.getInParams().keySet()) {
-			    Object value = procedureInput.getInParams().get(param);
-			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			    if (value instanceof String) {
-			    	 String stringValue = (String) value;
-			         			         try {
-			             Date dateValue = dateFormat.parse(stringValue);
-			             
-			             Timestamp timestamp = new Timestamp(dateValue.getTime());
-			             
-			             inputs.put(param, timestamp);
-			         } catch (ParseException e) {
+				Object value = procedureInput.getInParams().get(param);
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				if (value instanceof String) {
+					String stringValue = (String) value;
+					try {
+						Date dateValue = dateFormat.parse(stringValue);
 
-			         }
-			    }
+						Timestamp timestamp = new Timestamp(dateValue.getTime());
+
+						inputs.put(param, timestamp);
+					} catch (ParseException e) {
+
+					}
+				}
 			}
 
 			try {
-			    Map<String, Object> outParams = simpleJdbcCall.execute(inputs);
+				Map<String, Object> outParams = simpleJdbcCall.execute(inputs);
 
-			    SqlParameterSource parameterSource = new MapSqlParameterSource();
+				SqlParameterSource parameterSource = new MapSqlParameterSource();
 
-			    ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData()
-			            .getProcedureColumns(null, null, procedureName, null);
+				ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData()
+						.getProcedureColumns(null, null, procedureName, null);
 
-			    while (resultSet.next()) {
-			        String parameterName = resultSet.getString("COLUMN_NAME");
-			        int parameterType = resultSet.getInt("COLUMN_TYPE");
+				while (resultSet.next()) {
+					String parameterName = resultSet.getString("COLUMN_NAME");
+					int parameterType = resultSet.getInt("COLUMN_TYPE");
 
-			        if (parameterType == 1) {
-			            // Input parameter logic
-			        } else if (parameterType == 4) {
-			            // Output parameter logic
-			        }
-			    }
+					if (parameterType == 1) {
+						// Input parameter logic
+					} else if (parameterType == 4) {
+						// Output parameter logic
+					}
+				}
 
-			    if (outParams.size() > 0) {
-			        response.put(statusCode, successCode);
-			        response.put(dataCode, outParams);
-			        if (outParams.get("P_SUCC_YN") != null && outParams.get("P_SUCC_YN").equals("N")) {
-			            response.put(statusCode, errorCode);
-			            response.put(messageCode, outParams.get("P_ERR_MSG"));
-			        }
-			    } else {
-			        response.put(statusCode, errorCode);
-			        response.put(messageCode, "For the Selected Claim Type No Value's Present");
-			    }
+				if (outParams.size() > 0) {
+					response.put(statusCode, successCode);
+					response.put(dataCode, outParams);
+					if (outParams.get("P_SUCC_YN") != null && outParams.get("P_SUCC_YN").equals("N")) {
+						response.put(statusCode, errorCode);
+						response.put(messageCode, outParams.get("P_ERR_MSG"));
+					}
+				} else {
+					response.put(statusCode, errorCode);
+					response.put(messageCode, "For the Selected Claim Type No Value's Present");
+				}
 			} catch (Exception e) {
-			    e.printStackTrace();
-			    response.put(statusCode, errorCode);
-			    response.put(messageCode, e.getMessage());
+				e.printStackTrace();
+				response.put(statusCode, errorCode);
+				response.put(messageCode, e.getMessage());
 			}
 		} else {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
 					.withProcedureName(procedureName);
-			
-			Map<String, Object> inputs = procedureInput.getInParams();
-			
-			for (String param : procedureInput.getInParams().keySet()) {
-			    Object value = procedureInput.getInParams().get(param);
-			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-			    if (value instanceof String) {
-			    	 String stringValue = (String) value;
-			         			         try {
-			             Date dateValue = dateFormat.parse(stringValue);
-			             
-			             Timestamp timestamp = new Timestamp(dateValue.getTime());
-			             
-			             inputs.put(param, timestamp);
-			         } catch (ParseException e) {
 
-			         }
-			    }
+			Map<String, Object> inputs = procedureInput.getInParams();
+
+			for (String param : procedureInput.getInParams().keySet()) {
+				Object value = procedureInput.getInParams().get(param);
+				SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+				if (value instanceof String) {
+					String stringValue = (String) value;
+					try {
+						Date dateValue = dateFormat.parse(stringValue);
+
+						Timestamp timestamp = new Timestamp(dateValue.getTime());
+
+						inputs.put(param, timestamp);
+					} catch (ParseException e) {
+
+					}
+				}
 			}
 			try {
 				Map<String, Object> outParams = simpleJdbcCall.execute(inputs);
@@ -1318,7 +1324,7 @@ public class CommonServiceImpl implements CommonService {
 		String token = authorizationHeader.substring(7).trim();
 		Map<String, Object> params = processParamLOV(null, request);
 		String url = baseDocPath + "reportBuilder/getRB?rbSysId=" + params.get("tranId");
-	
+
 		HttpHeaders headers = new HttpHeaders();
 		RestTemplate restTemplate = new RestTemplate();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -1403,11 +1409,10 @@ public class CommonServiceImpl implements CommonService {
 
 					if (finalResult.size() >= 1) {
 						response.put(dataCode, finalResult);
-					} 
+					}
 				} else {
 					response.put(statusCode, successCode);
-					response.put(messageCode,
-							"No Datas Found");
+					response.put(messageCode, "No Datas Found");
 					response.put(dataCode, new JSONObject());
 				}
 
@@ -1420,10 +1425,9 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	}
 
-	
-	
 	@Override
-	public String claimBeneficiaryEdit(String screenCode, String screenName, Integer tranId, HttpServletRequest request) {
+	public String claimBeneficiaryEdit(String screenCode, String screenName, Integer tranId,
+			HttpServletRequest request) {
 		JSONObject response = new JSONObject();
 		String authorizationHeader = request.getHeader("Authorization");
 		String token = authorizationHeader.substring(7).trim();
@@ -1493,61 +1497,60 @@ public class CommonServiceImpl implements CommonService {
 
 		String documentName = "claimheader";
 		JSONObject response = new JSONObject();
-		
+
 		SearchHit[] searchHits = elasticSearch(documentName, request);
 		Map<String, Object> params = processParamLOV(null, request);
 
 		LinkedHashMap<String, String> heading = new LinkedHashMap<String, String>();
 		String jsonString = "";
-		
+
 		QUERY_MASTER query = commonDao.getQueryLov(Integer.parseInt(params.get("queryId").toString()));
 		List<Map<String, Object>> queryResult = commonDao.getListingData(query.getQM_QUERY(),
 				Integer.parseInt(params.get("limit").toString()), Integer.parseInt(params.get("offset").toString()));
-		
+
 		List<Map<String, Object>> finalResult = new ArrayList<>();
 		Map<String, Object> finalMap = new HashMap<>();
-		
+
 		ObjectMapper mapper = new ObjectMapper();
 
 		try {
-		ClaimHdrIndex claim = new ClaimHdrIndex();
-		Class classs = claim.getClass();
-		Map<String, Object> firstRow = queryResult.get(0);
-		Set<String> columnNames = firstRow.keySet();
-		String headString = (String) firstRow.get("Head");
+			ClaimHdrIndex claim = new ClaimHdrIndex();
+			Class classs = claim.getClass();
+			Map<String, Object> firstRow = queryResult.get(0);
+			Set<String> columnNames = firstRow.keySet();
+			String headString = (String) firstRow.get("Head");
 
-		String[] headingNames = headString.split(",");
-		for (String headingName : headingNames) {
-			heading.put(headingName.trim(), headingName.trim());
-		}
-		jsonString = mapper.writeValueAsString(heading);
-		for (SearchHit hit : searchHits) {
-			finalMap = new HashMap<>();
-			claim = new ClaimHdrIndex();
-			mapper.registerModule(new JavaTimeModule());
-			String documentId = hit.getId();
-			String sourceAsString = hit.getSourceAsString();
-			claim = mapper.readValue(sourceAsString, ClaimHdrIndex.class);
-			for (String headings : headingNames) {
-				String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
-						+ headings.substring(1, headings.length());
-				Method setter = classs.getMethod(setterMethodName);
-				Object value = setter.invoke(claim);
-				finalMap.put(headings.trim(), value);
+			String[] headingNames = headString.split(",");
+			for (String headingName : headingNames) {
+				heading.put(headingName.trim(), headingName.trim());
 			}
-			finalResult.add(finalMap);
-		}
-		response.put("Count", searchHits.length);
-		response.put("Heading", jsonString);
-		response.put(statusCode, successCode);
-		response.put(dataCode, finalResult);
-		
-		return response.toString();
-		}catch(Exception e) {
+			jsonString = mapper.writeValueAsString(heading);
+			for (SearchHit hit : searchHits) {
+				finalMap = new HashMap<>();
+				claim = new ClaimHdrIndex();
+				mapper.registerModule(new JavaTimeModule());
+				String documentId = hit.getId();
+				String sourceAsString = hit.getSourceAsString();
+				claim = mapper.readValue(sourceAsString, ClaimHdrIndex.class);
+				for (String headings : headingNames) {
+					String setterMethodName = "get" + headings.substring(0, 1).toUpperCase().trim()
+							+ headings.substring(1, headings.length());
+					Method setter = classs.getMethod(setterMethodName);
+					Object value = setter.invoke(claim);
+					finalMap.put(headings.trim(), value);
+				}
+				finalResult.add(finalMap);
+			}
+			response.put("Count", searchHits.length);
+			response.put("Heading", jsonString);
+			response.put(statusCode, successCode);
+			response.put(dataCode, finalResult);
+
+			return response.toString();
+		} catch (Exception e) {
 			e.printStackTrace();
 			return e.getMessage();
 		}
-
 
 	}
 
@@ -1572,7 +1575,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-	
+
 	@Override
 	public String polBrokerEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1594,7 +1597,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-	
+
 	@Override
 	public String polChargeEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1616,7 +1619,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-	
+
 	@Override
 	public String polDiscLoadEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1638,7 +1641,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-	
+
 	@Override
 	public String polEmpCoverEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1660,7 +1663,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-	
+
 	@Override
 	public String polEmployeeEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1682,7 +1685,7 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-	
+
 	@Override
 	public String policyEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -1702,30 +1705,30 @@ public class CommonServiceImpl implements CommonService {
 		response.put(messageCode, "Policy Details Fetched Successfully");
 		response.put(dataCode, obj);
 		try {
-			if(object.opt("POL_WF_STS") != null) {
+			if (object.opt("POL_WF_STS") != null) {
 				response.put("POL_WF_STS", object.get("POL_WF_STS"));
-			}else {
+			} else {
 				response.put("POL_WF_STS", "");
 			}
-		if(object.opt("POL_NO") != null) {
-		response.put("PROPOSAL_NO", object.get("POL_NO"));
-		}else {
-			response.put("PROPOSAL_NO", "");	
-		}
-		
-		if(object.opt("POL_STATUS") != null) {
-			response.put("POL_STATUS", object.get("POL_STATUS"));
-		}else {
-			response.put("POL_STATUS", "");
-		}
-		
-		if(object.opt("POL_PREM_CALC_YN") != null) {
-			response.put("POL_PREM_CALC_YN", object.get("POL_PREM_CALC_YN"));
-		}else {
-			response.put("POL_PREM_CALC_YN", "");
-		}
-		
-		}catch(Exception e) {
+			if (object.opt("POL_NO") != null) {
+				response.put("PROPOSAL_NO", object.get("POL_NO"));
+			} else {
+				response.put("PROPOSAL_NO", "");
+			}
+
+			if (object.opt("POL_STATUS") != null) {
+				response.put("POL_STATUS", object.get("POL_STATUS"));
+			} else {
+				response.put("POL_STATUS", "");
+			}
+
+			if (object.opt("POL_PREM_CALC_YN") != null) {
+				response.put("POL_PREM_CALC_YN", object.get("POL_PREM_CALC_YN"));
+			} else {
+				response.put("POL_PREM_CALC_YN", "");
+			}
+
+		} catch (Exception e) {
 			response.put("PROPOSAL NO", "");
 		}
 		return response.toString();
@@ -1844,15 +1847,15 @@ public class CommonServiceImpl implements CommonService {
 		String jsonString = "";
 		try {
 			jsonString = objectMapper.writeValueAsString(heading);
-		} catch (JsonProcessingException e) { 
+		} catch (JsonProcessingException e) {
 			e.printStackTrace();
 		}
 		JSONObject headingJson = new JSONObject(jsonString);
 		response.put("Heading", jsonString);
 		response.put(statusCode, successCode);
-		if(queryResult.size() >= 1) {
-		response.put(dataCode, queryResult);
-		}else {
+		if (queryResult.size() >= 1) {
+			response.put(dataCode, queryResult);
+		} else {
 			response.put(dataCode, new ArrayList<>());
 		}
 
@@ -1866,29 +1869,29 @@ public class CommonServiceImpl implements CommonService {
 		JSONObject userLevel = new JSONObject();
 		Map<String, Map<String, LM_USER_APPR_SETUP_DET>> data = new HashMap<>();
 //		Map<String, String> innerData = new HashMap<>();
-		
+
 		HashMap<Object, Object> validationFields = new HashMap<>();
-		
+
 		List<LM_USER_APPR_SETUP_DET> userSetup = userApprSetupRepo.getSetup(rulesJsonRequest.getUserId());
-		
-		for(LM_USER_APPR_SETUP_DET setup : userSetup) {
+
+		for (LM_USER_APPR_SETUP_DET setup : userSetup) {
 //			System.out.println(setup.getASD_CODE());
-			if(setup.getASD_FM_PROD_CODE().equals("0") && setup.getASD_TO_PROD_CODE().equals("zzzzzzzzzzzz")) {
-				if(data.get("ALL") != null) {
+			if (setup.getASD_FM_PROD_CODE().equals("0") && setup.getASD_TO_PROD_CODE().equals("zzzzzzzzzzzz")) {
+				if (data.get("ALL") != null) {
 					Map<String, LM_USER_APPR_SETUP_DET> innerData = data.get("ALL");
 					innerData.put(setup.getASD_CODE(), setup);
 					data.replace("ALL", innerData);
-				}else {
+				} else {
 					Map<String, LM_USER_APPR_SETUP_DET> innerData = new HashMap<>();
 					innerData.put(setup.getASD_CODE(), setup);
 					data.put("ALL", innerData);
 				}
-			}else {
-				if(data.get(setup.getASD_FM_PROD_CODE()) != null) {
+			} else {
+				if (data.get(setup.getASD_FM_PROD_CODE()) != null) {
 					Map<String, LM_USER_APPR_SETUP_DET> innerData = data.get(setup.getASD_FM_PROD_CODE());
 					innerData.put(setup.getASD_CODE(), setup);
 					data.replace(setup.getASD_FM_PROD_CODE(), innerData);
-				}else {
+				} else {
 					Map<String, LM_USER_APPR_SETUP_DET> innerData = new HashMap<>();
 					innerData.put(setup.getASD_CODE(), setup);
 					data.put(setup.getASD_FM_PROD_CODE(), innerData);
@@ -1904,13 +1907,14 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public String generateBoundaryConds(RulesJsonRequest rulesJsonRequest, HttpServletRequest request)throws Exception {
+	public String generateBoundaryConds(RulesJsonRequest rulesJsonRequest, HttpServletRequest request)
+			throws Exception {
 		JSONObject response = new JSONObject();
 		JSONObject model = new JSONObject();
-		
+
 		Optional<LM_PRODUCT> product = productRepo.findById(rulesJsonRequest.getProdCode());
 		LM_PRODUCT prod = product.get();
-		if(prod!=null) {
+		if (prod != null) {
 			for (int i = 0; i < prod.getClass().getDeclaredFields().length; i++) {
 				Field field = prod.getClass().getDeclaredFields()[i];
 				field.setAccessible(true);
@@ -1928,5 +1932,93 @@ public class CommonServiceImpl implements CommonService {
 		model.put(messageCode, "Boundary Conditions Fetched Successfully");
 		model.put(dataCode, response);
 		return model.toString();
+	}
+
+	@Override
+	public String getReportMenuList() {
+
+		JSONObject response = new JSONObject();
+		QUERY_MASTER parentQuery = commonDao.getQueryLov(231);
+		List<MenuResultDTO> parentList = (List<MenuResultDTO>) commonDao.getReportMenuList(parentQuery.getQM_QUERY());
+		List<MenuResultDTO> finalResult = new ArrayList<>();
+
+		QUERY_MASTER childQuery = commonDao.getQueryLov(232);
+		QUERY_MASTER subChildQuery = commonDao.getQueryLov(233);
+
+		if (parentList.size() >= 1) {
+			response.put(statusCode, successCode);
+			response.put(messageCode, "Report MenuList Fetched Successfully");
+
+			for (MenuResultDTO parentMenu : parentList) {
+				if (parentMenu.getRepParentId().equals("**")) {
+
+					List<MenuResultDTO> children = (List<MenuResultDTO>) commonDao
+							.getChildReportList(parentMenu.getRepId(), childQuery.getQM_QUERY());
+
+					for (MenuResultDTO childMenu : children) {
+
+						List<MenuResultDTO> subChildren = (List<MenuResultDTO>) commonDao
+								.getsubChildReportMenuList(childMenu.getRepId(), subChildQuery.getQM_QUERY());
+
+						if (subChildren != null && !subChildren.isEmpty()) {
+							childMenu.setChildrens(subChildren);
+						}
+					}
+
+					if (children != null && !children.isEmpty()) {
+						parentMenu.setChildrens(children);
+					}
+
+					finalResult.add(parentMenu);
+				}
+			}
+
+			response.put("Data", finalResult);
+		} else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "No Menu Data Available");
+		}
+
+		return response.toString();
+	}
+
+	private List<MenuResultDTO> getReportMenuListAsList() {
+		String reportMenuJson = getReportMenuList();
+		JSONObject reportMenuResponse = new JSONObject(reportMenuJson);
+		List<MenuResultDTO> reportList = new ArrayList<>();
+		if (reportMenuResponse.has("Data")) {
+			JSONArray dataArray = reportMenuResponse.getJSONArray("Data");
+			for (int i = 0; i < dataArray.length(); i++) {
+				JSONObject menuObject = dataArray.getJSONObject(i);
+				MenuResultDTO menu = new MenuResultDTO();
+
+				menu.setMenuOptionDesc(menuObject.getString("repName"));
+				menu.setListingQueryId(menuObject.getString("repId"));
+				menu.setMenuId(menuObject.getString("repId"));
+				menu.setMenuActionType(menuObject.getString("repMenuFlag"));
+				menu.setMenuParentId(menuObject.getString("repParentId"));
+				menu.setMenuURL(menuObject.getString("repAdds1"));
+
+				if (menuObject.has("childrens")) {
+					JSONArray childrenArray = menuObject.getJSONArray("childrens");
+					List<MenuResultDTO> children = new ArrayList<>();
+					for (int j = 0; j < childrenArray.length(); j++) {
+						JSONObject childObject = childrenArray.getJSONObject(j);
+						MenuResultDTO childMenu = new MenuResultDTO();
+						childMenu.setMenuOptionDesc(childObject.getString("repName"));
+						childMenu.setListingQueryId(childObject.getString("repId"));
+						childMenu.setMenuId(childObject.getString("repId"));
+						childMenu.setMenuActionType(childObject.getString("repMenuFlag"));
+						childMenu.setMenuParentId(childObject.getString("repParentId"));
+						childMenu.setMenuURL(childObject.getString("repAdds1"));
+
+						children.add(childMenu);
+					}
+					menu.setChildrens(children);
+				}
+				reportList.add(menu);
+			}
+		}
+		return reportList;
 	}
 }

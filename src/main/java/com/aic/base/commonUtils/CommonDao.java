@@ -51,4 +51,10 @@ public interface CommonDao {
 
 	List<Map<String, Object>> newMrvListing(String qm_QUERY, Map<String, Object> parameters);
 
+	List<MenuResultDTO> getReportMenuList(String qm_QUERY);
+
+	List<MenuResultDTO> getChildReportList(String repId, String qm_QUERY);
+
+	List<MenuResultDTO> getsubChildReportMenuList(String repId, String qm_QUERY);
+
 }
