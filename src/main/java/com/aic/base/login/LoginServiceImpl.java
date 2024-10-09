@@ -336,7 +336,7 @@ public class LoginServiceImpl implements LoginService {
 					loginservice.loginToLJMLogs1("User logged in successfully", request, token);
 
 					// Include procedure invocation details if needed
-					Map<String, String> inputMap = new HashMap<>();
+					Map<String, Object> inputMap = new HashMap<>();
 					inputMap.put("P_USER", auth.getUsername());
 					inputMap.put("P_COMP_CODE", auth.getCompany());
 					inputMap.put("P_DEPT_CODE", auth.getDepartment());

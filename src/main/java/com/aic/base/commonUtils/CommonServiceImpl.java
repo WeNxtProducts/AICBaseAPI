@@ -11,12 +11,15 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -411,6 +414,8 @@ public class CommonServiceImpl implements CommonService {
 //			paramsMap.remove("queryId");
 			Map<String, Object> parameters = new HashMap<>();
 			parameters.put("searchTerm", paramLovRequestDTO.getSearchTerm());
+			parameters.put("userInput", paramLovRequestDTO.getUserInput());
+			parameters.put("COMP_CODE", paramLovRequestDTO.getCOMP_CODE());
 			List<LOVDTO> queryResult = commonDao.executeLOVQuery(query.getQM_QUERY(), parameters);
 			JSONObject responseData = new JSONObject();
 			responseData.put(query.getQM_QUERY_NAME(), queryResult);
@@ -1185,52 +1190,84 @@ public class CommonServiceImpl implements CommonService {
 		if (packageName == null || packageName.isEmpty() == true) {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withProcedureName(procedureName);
 
+			Map<String, Object> inputs = new HashMap<>(procedureInput.getInParams());
+
+			for (String param : procedureInput.getInParams().keySet()) {
+			    Object value = procedureInput.getInParams().get(param);
+			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			    if (value instanceof String) {
+			    	 String stringValue = (String) value;
+			         			         try {
+			             Date dateValue = dateFormat.parse(stringValue);
+			             
+			             Timestamp timestamp = new Timestamp(dateValue.getTime());
+			             
+			             inputs.put(param, timestamp);
+			         } catch (ParseException e) {
+
+			         }
+			    }
+			}
+
 			try {
-				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
-				SqlParameterSource parameterSource = new MapSqlParameterSource();
+			    Map<String, Object> outParams = simpleJdbcCall.execute(inputs);
 
-				ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData()
-						.getProcedureColumns(null, null, procedureName, null);
+			    SqlParameterSource parameterSource = new MapSqlParameterSource();
 
-				while (resultSet.next()) {
-					String parameterName = resultSet.getString("COLUMN_NAME");
-					int parameterType = resultSet.getInt("COLUMN_TYPE");
+			    ResultSet resultSet = simpleJdbcCall.getJdbcTemplate().getDataSource().getConnection().getMetaData()
+			            .getProcedureColumns(null, null, procedureName, null);
 
-					if (parameterType == 1) {
+			    while (resultSet.next()) {
+			        String parameterName = resultSet.getString("COLUMN_NAME");
+			        int parameterType = resultSet.getInt("COLUMN_TYPE");
 
-					} else if (parameterType == 4) {
+			        if (parameterType == 1) {
+			            // Input parameter logic
+			        } else if (parameterType == 4) {
+			            // Output parameter logic
+			        }
+			    }
 
-					}
-				}
-//				boolean successFlag = true;
-//				for (String key : outParams.keySet()) {
-//					if (outParams.get(key) == null) {
-//						successFlag = false;
-//					}
-//				}
-				if (outParams.size() > 0) {
-					response.put(statusCode, successCode);
-					response.put(dataCode, outParams);
-					if(outParams.get("P_SUCC_YN").equals("N")) {
-						response.put(statusCode, errorCode);
-						response.put(messageCode, outParams.get("P_ERR_MSG"));
-					}
-				} 
-				else {
-					response.put(statusCode, errorCode);
-					response.put(messageCode, "For the Selected Claim Type No Value's Present");
-				}
+			    if (outParams.size() > 0) {
+			        response.put(statusCode, successCode);
+			        response.put(dataCode, outParams);
+			        if (outParams.get("P_SUCC_YN") != null && outParams.get("P_SUCC_YN").equals("N")) {
+			            response.put(statusCode, errorCode);
+			            response.put(messageCode, outParams.get("P_ERR_MSG"));
+			        }
+			    } else {
+			        response.put(statusCode, errorCode);
+			        response.put(messageCode, "For the Selected Claim Type No Value's Present");
+			    }
 			} catch (Exception e) {
-				e.printStackTrace();
-				response.put(statusCode, errorCode);
-				response.put(messageCode, e.getMessage());
+			    e.printStackTrace();
+			    response.put(statusCode, errorCode);
+			    response.put(messageCode, e.getMessage());
 			}
 		} else {
 			SimpleJdbcCall simpleJdbcCall = new SimpleJdbcCall(jdbcTemplate).withCatalogName(packageName)
 					.withProcedureName(procedureName);
+			
+			Map<String, Object> inputs = procedureInput.getInParams();
+			
+			for (String param : procedureInput.getInParams().keySet()) {
+			    Object value = procedureInput.getInParams().get(param);
+			    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+			    if (value instanceof String) {
+			    	 String stringValue = (String) value;
+			         			         try {
+			             Date dateValue = dateFormat.parse(stringValue);
+			             
+			             Timestamp timestamp = new Timestamp(dateValue.getTime());
+			             
+			             inputs.put(param, timestamp);
+			         } catch (ParseException e) {
+
+			         }
+			    }
+			}
 			try {
-				System.out.println(procedureInput.getInParams());
-				Map<String, Object> outParams = simpleJdbcCall.execute(procedureInput.getInParams());
+				Map<String, Object> outParams = simpleJdbcCall.execute(inputs);
 
 				response.put(statusCode, successCode);
 				response.put(dataCode, outParams);
@@ -1823,7 +1860,7 @@ public class CommonServiceImpl implements CommonService {
 	}
 
 	@Override
-	public String generateRulesJson(RulesJsonRequest rulesJsonRequest, HttpServletRequest request) {
+	public String generateRulesJson(RulesJsonRequest rulesJsonRequest) {
 		JSONObject result = new JSONObject();
 		JSONObject moduleLevel = new JSONObject();
 		JSONObject userLevel = new JSONObject();
@@ -1859,7 +1896,9 @@ public class CommonServiceImpl implements CommonService {
 			}
 		}
 
-		result.put("Data", data);
+		result.put(statusCode, successCode);
+		result.put(messageCode, "Rules JSON Generated Successfully");
+		result.put(dataCode, data);
 
 		return result.toString();
 	}
@@ -1885,6 +1924,8 @@ public class CommonServiceImpl implements CommonService {
 				}
 			}
 		}
+		model.put(statusCode, successCode);
+		model.put(messageCode, "Boundary Conditions Fetched Successfully");
 		model.put(dataCode, response);
 		return model.toString();
 	}

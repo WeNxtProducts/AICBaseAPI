@@ -57,7 +57,7 @@ public class CommonController {
 		return service.getQueryParamLOV(request);
 	}
 	
-	@GetMapping("/newparamlov")
+	@PostMapping("/newparamlov")
 	public String newQueryParamLov(HttpServletRequest request, @RequestBody ParamLovRequestDTO paramLovRequestDTO) {
 		return service.newQueryParamLOV(request, paramLovRequestDTO);
 	}
@@ -391,8 +391,8 @@ public class CommonController {
 	}
 	
 	@PostMapping("/rulesJson")
-	public String generateRulesJson(@RequestBody RulesJsonRequest rulesJsonRequest, HttpServletRequest request) {
-		return service.generateRulesJson(rulesJsonRequest, request);
+	public String generateRulesJson(@RequestBody RulesJsonRequest rulesJsonRequest) {
+		return service.generateRulesJson(rulesJsonRequest);
 	}
 	
 	@PostMapping("/boundaryConds")

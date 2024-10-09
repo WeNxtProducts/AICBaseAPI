@@ -4,13 +4,13 @@ import java.util.Map;
 
 public class ProcedureInput {
 	
-	private Map<String, String> inParams;
+	private Map<String, Object> inParams;
 
-	public Map<String, String> getInParams() {
+	public Map<String, Object> getInParams() {
 		return inParams;
 	}
 
-	public void setInParams(Map<String, String> inParams) {
+	public void setInParams(Map<String, Object> inParams) {
 		this.inParams = inParams;
 	}
 

@@ -1,7 +1,10 @@
 package com.aic.base.commonUtils;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class RulesJsonRequest {
 	
+	@JsonProperty("userId")
 	private String userId;
 	
 	private String moduleId;

@@ -110,7 +110,7 @@ public interface CommonService {
 
 	public String newMrvListing(HttpServletRequest request, MrvRequestDTO mrvRequestDto);
 
-	public String generateRulesJson(RulesJsonRequest rulesJsonRequest, HttpServletRequest request);
+	public String generateRulesJson(RulesJsonRequest rulesJsonRequest);
 
 	public String newQueryParamLOV(HttpServletRequest request, ParamLovRequestDTO paramLovRequestDTO);
 
