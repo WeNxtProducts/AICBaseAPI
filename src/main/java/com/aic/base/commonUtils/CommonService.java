@@ -123,4 +123,6 @@ public interface CommonService {
 
 	String getReportMenuList();
 
+	public String loanEdit(HttpServletRequest request);
+
 }

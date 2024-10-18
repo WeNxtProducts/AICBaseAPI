@@ -396,6 +396,16 @@ public class CommonController {
 			return e.getMessage();
 		}
 	}
+	
+	@GetMapping("/loanEdit")
+	public String loanEdit(HttpServletRequest request) {
+		try {
+			return service.loanEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
 
 	@PostMapping("/rulesJson")
 	public String generateRulesJson(@RequestBody RulesJsonRequest rulesJsonRequest) {

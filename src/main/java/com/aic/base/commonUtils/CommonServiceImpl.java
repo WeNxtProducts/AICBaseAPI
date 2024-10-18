@@ -994,12 +994,18 @@ public class CommonServiceImpl implements CommonService {
 		headers.set("Authorization", "Bearer " + token);
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		if(responseEntity.getBody() != null) {
+			System.out.println("IN");
 		JSONObject object = new JSONObject(responseEntity.getBody());
-
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "Claim estimate Details Fetched Successfully");
 		response.put(dataCode, obj);
+		}else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "No Value Present");
+		}
+
 		return response.toString();
 	}
 
@@ -2020,5 +2026,33 @@ public class CommonServiceImpl implements CommonService {
 			}
 		}
 		return reportList;
+	}
+
+	@Override
+	public String loanEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		try {
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "loan/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Loan Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+		}catch(Exception e) {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, e.getMessage());
+			return response.toString();
+		}
 	}
 }
