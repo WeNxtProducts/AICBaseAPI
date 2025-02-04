@@ -71,5 +71,10 @@ public class EmailTemplateController {
 	public String emailQueries() {
 		return emailTemplateService.getEmailQueries();
 	}
+	
+	@GetMapping("/getParams")
+	public String getParams() {
+		return emailTemplateService.getParams();
+	}
 
 }

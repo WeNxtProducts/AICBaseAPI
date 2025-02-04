@@ -420,4 +420,9 @@ public class CommonController {
 			return e.getMessage();
 		}
 	}
+	
+	@PostMapping("/test")
+	public void test() {
+		System.out.println("TEST");
+	}
 }

@@ -30,4 +30,6 @@ public interface EmailTemplateService {
 
 	public String getEmailQueries();
 
+	public String getParams();
+
 }

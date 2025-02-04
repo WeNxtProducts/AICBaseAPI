@@ -114,7 +114,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			try {
 				LJM_EMAIL_TEMPLATE savedTemplate = emailTemplateRepo.save(template);
 				response.put(statusCode, successCode);
-				response.put(messageCode, "User created successfully");
+				response.put(messageCode, "Email Template Details created successfully");
 				data.put("Id", savedTemplate.getET_SYS_ID());
 				response.put("data", data);
 			} catch (Exception e) {
@@ -169,7 +169,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				try {
 					LJM_EMAIL_TEMPLATE savedClaimDetails = emailTemplateRepo.save(claim);
 					response.put(statusCode, successCode);
-					response.put(messageCode, "Claim Details Updated Successfully");
+					response.put(messageCode, "Email Template Details Updated Successfully");
 				} catch (Exception e) {
 					response.put("statusCode", errorCode);
 					response.put("message", "An error occurred: " + e.getMessage());
@@ -648,6 +648,26 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			response.put(statusCode, errorCode);
 			response.put(messageCode, "Can't get query to get List of Email Queries");
 		}
+		return response.toString();
+	}
+
+	@Override
+	public String getParams() {
+		JSONObject response = new JSONObject();
+		
+		QUERY_MASTER query = commonDao.getQueryLov(250);
+		
+		if(query != null) {
+			List<LOVDTO> queryList = commonDao.executeLOVQuery(query.getQM_QUERY(), null);
+			
+			response.put(statusCode, successCode);
+			response.put(messageCode, "List Of Available Parameters Fetched Successfully");
+			response.put(dataCode, queryList);
+		}else {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "Can't get query to get List of Parameters");
+		}
+		
 		return response.toString();
 	}
 
