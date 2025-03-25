@@ -125,4 +125,12 @@ public interface CommonService {
 
 	public String loanEdit(HttpServletRequest request);
 
+	public String ltQuoteEdit(HttpServletRequest request);
+
+	public String ltQuoteDiscLoadEdit(HttpServletRequest request);
+
+	public String ltQuoteBeneficiaryEdit(HttpServletRequest request);
+
+	public String ltQquotAssuredDtlsEdit(HttpServletRequest request);
+
 }

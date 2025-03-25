@@ -2055,4 +2055,94 @@ public class CommonServiceImpl implements CommonService {
 			return response.toString();
 		}
 	}
+
+	@Override
+	public String ltQuoteEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "ltQuoteDetails/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "LT Quote Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String ltQuoteDiscLoadEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "ltQquotDiscLoad/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "LT QuoteDiscLoad Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String ltQuoteBeneficiaryEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "ltQuoteBeneficiary/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "LT QuoteBeneficiary Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String ltQquotAssuredDtlsEdit(HttpServletRequest request) {
+
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "ltQquotAssuredDtls/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "LTQquotAssuredDtls Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	
+	}
 }

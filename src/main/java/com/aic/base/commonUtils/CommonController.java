@@ -425,4 +425,44 @@ public class CommonController {
 	public void test() {
 		System.out.println("TEST");
 	}
+	
+	@GetMapping("/ltQuoteEdit")
+	public String ltQuoteEdit(HttpServletRequest request) {
+		try {
+			return service.ltQuoteEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+	
+	@GetMapping("/ltQuoteDiscLoadEdit")
+	public String ltQuoteDiscLoadEdit(HttpServletRequest request) {
+		try {
+			return service.ltQuoteDiscLoadEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+	
+	@GetMapping("/ltQuoteBeneficiaryEdit")
+	public String ltQuoteBeneficiaryEdit(HttpServletRequest request) {
+		try {
+			return service.ltQuoteBeneficiaryEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+	
+	@GetMapping("/ltQquotAssuredDtlsEdit")
+	public String ltQquotAssuredDtlsEdit(HttpServletRequest request) {
+		try {
+			return service.ltQquotAssuredDtlsEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
 }
