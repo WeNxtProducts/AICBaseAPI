@@ -71,6 +71,7 @@ import eu.bitwalker.useragentutils.Browser;
 import eu.bitwalker.useragentutils.UserAgent;
 import jakarta.persistence.Column;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 
 @Service
 public class CommonServiceImpl implements CommonService {
@@ -92,6 +93,15 @@ public class CommonServiceImpl implements CommonService {
 
 	@Autowired
 	private CommonDao commonDao;
+	
+//    @Autowired
+//    private QuoteRepository quoteRepository;
+//
+//    @Autowired
+//    private CoverRepository coverRepository;
+//
+//    @Autowired
+//    private AppliedCoverRepository appliedCoverRepository;
 
 	@Value("${insert.audit.log}")
 	private String saveAuditMessage;
@@ -636,6 +646,7 @@ public class CommonServiceImpl implements CommonService {
 			HttpEntity<String> requestEntity = new HttpEntity<>(jsonObject.toString(), headers);
 			String url = getBaseURL + object.getserv_url() + "?" + "screenCode=" + params.get("screenCode")
 					+ "&screenName=" + params.get("screenName");
+			System.out.println();
 			ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {
 				String serviceResponse = responseEntity.getBody();
@@ -662,6 +673,7 @@ public class CommonServiceImpl implements CommonService {
 
 		String file_path = basePath + params.get("screenName") + "_getLOVList.json";
 		QUERY_MASTER query = commonDao.getQueryLov(18);
+		System.out.println(query.getQM_QUERY());
 		if (query != null) {
 			List<LovToJsonDTO> result = commonDao.lovToJson(query.getQM_QUERY(), params.get("screenCode").toString(),
 					params.get("screenName").toString());
@@ -675,13 +687,13 @@ public class CommonServiceImpl implements CommonService {
 				BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
 				response.put(statusCode, successCode);
 				response.put(messageCode, LOVtoJSON);
-				response.put("Result", resultMap);
-				bufferedWriter.write(response.get("Result").toString());
+				response.put(dataCode, resultMap);
+				bufferedWriter.write(response.get(dataCode).toString());
 				bufferedWriter.close();
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-			response.remove("Result");
+//			response.remove("Result");
 			return response.toString();
 		} else {
 			response.put(statusCode, errorCode);
@@ -2070,14 +2082,14 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
-
+ 
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "LT Quote Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-
+	
 	@Override
 	public String ltQuoteDiscLoadEdit(HttpServletRequest request) {
 		JSONObject response = new JSONObject();
@@ -2092,39 +2104,39 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
-
+ 
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "LT QuoteDiscLoad Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
 	}
-
+	
 	@Override
-	public String ltQuoteBeneficiaryEdit(HttpServletRequest request) {
-		JSONObject response = new JSONObject();
-		String authorizationHeader = request.getHeader("Authorization");
-		String token = authorizationHeader.substring(7).trim();
-		Map<String, Object> params = processParamLOV(null, request);
-		String url = baseCrudPath + "ltQuoteBeneficiary/get?tranId=" + params.get("tranId");
-		HttpHeaders headers = new HttpHeaders();
-		RestTemplate restTemplate = new RestTemplate();
-		headers.setContentType(MediaType.APPLICATION_JSON);
-		headers.set("Authorization", "Bearer " + token);
-		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
-		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
-		JSONObject object = new JSONObject(responseEntity.getBody());
-
-		JSONObject obj = new JSONObject(newEditTabs(request, object));
-		response.put(statusCode, successCode);
-		response.put(messageCode, "LT QuoteBeneficiary Details Fetched Successfully");
-		response.put(dataCode, obj);
-		return response.toString();
-	}
-
+		public String ltQuoteBeneficiaryEdit(HttpServletRequest request) {
+			JSONObject response = new JSONObject();
+			String authorizationHeader = request.getHeader("Authorization");
+			String token = authorizationHeader.substring(7).trim();
+			Map<String, Object> params = processParamLOV(null, request);
+			String url = baseCrudPath + "ltQuoteBeneficiary/get?tranId=" + params.get("tranId");
+			HttpHeaders headers = new HttpHeaders();
+			RestTemplate restTemplate = new RestTemplate();
+			headers.setContentType(MediaType.APPLICATION_JSON);
+			headers.set("Authorization", "Bearer " + token);
+			HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+			ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+			JSONObject object = new JSONObject(responseEntity.getBody());
+	 
+			JSONObject obj = new JSONObject(newEditTabs(request, object));
+			response.put(statusCode, successCode);
+			response.put(messageCode, "LT QuoteBeneficiary Details Fetched Successfully");
+			response.put(dataCode, obj);
+			return response.toString();
+		}
+	
 	@Override
 	public String ltQquotAssuredDtlsEdit(HttpServletRequest request) {
-
+ 
 		JSONObject response = new JSONObject();
 		String authorizationHeader = request.getHeader("Authorization");
 		String token = authorizationHeader.substring(7).trim();
@@ -2137,7 +2149,7 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
-
+ 
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "LTQquotAssuredDtls Details Fetched Successfully");
@@ -2145,4 +2157,30 @@ public class CommonServiceImpl implements CommonService {
 		return response.toString();
 	
 	}
+	
+//	@Override
+	public String ltQquotAssurdDtlsEdit(HttpServletRequest request) {
+ 
+		JSONObject response = new JSONObject();
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "ltQquotAssuredDtls/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+ 
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "LTQquotAssuredDtls Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	
+	}
+	
+
 }

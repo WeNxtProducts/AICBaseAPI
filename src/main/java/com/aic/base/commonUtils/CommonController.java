@@ -4,6 +4,7 @@ import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.lang.Nullable;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -268,7 +269,7 @@ public class CommonController {
 	}
 
 	@PostMapping("/getMapQuery")
-	public String getMapQuery(@RequestParam Integer queryId, @RequestBody QueryParametersDTO queryParams) {
+	public String getMapQuery(@RequestParam Integer queryId, @Nullable @RequestBody QueryParametersDTO queryParams) {
 		return service.getMapQuery(queryId, queryParams);
 	}
 
@@ -458,6 +459,16 @@ public class CommonController {
 	
 	@GetMapping("/ltQquotAssuredDtlsEdit")
 	public String ltQquotAssuredDtlsEdit(HttpServletRequest request) {
+		try {
+			return service.ltQquotAssuredDtlsEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+	
+	@GetMapping("/prodFactorsEdit")
+	public String ltQquotAssurdDtlsEdit(HttpServletRequest request) {
 		try {
 			return service.ltQquotAssuredDtlsEdit(request);
 		} catch (Exception e) {
