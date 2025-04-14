@@ -31,15 +31,19 @@ public class JwtService {
 	public static final String SECRET = "5367566B59703373367639792F423F4528482B4D6251655468576D5A71347437";
 
 	public String generateToken(AuthRequest userName) {
+		System.out.println("IN");
 		Map<String, Object> claims = new HashMap<>();
 		claims.put("Division", userName.getDivision());
 		claims.put("Department", userName.getDepartment());
 		claims.put("Company", userName.getCompany());
 		claims.put("Currency", userName.getBaseCurrency());
+		claims.put("type", "THIRD");
 		Optional<LM_MENU_USERS> userDetail = userrrepo.findByUserId(userName.getUsername());
 
 		claims.put("Role", userDetail.get().getUser_group_id());
 		claims.put("Language", userDetail.get().getUser_dflt_lang_code());
+		
+		System.out.println(claims);
 		return createToken(claims, userName.getUsername());
 	}
 

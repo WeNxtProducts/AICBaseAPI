@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -28,6 +29,7 @@ import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 @Configuration
 @EnableAsync
 @EnableJpaRepositories
+@EnableScheduling
 public class AicBaseApiApplication {
 	
 	@Value("${spring.allowed.origin}")

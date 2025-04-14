@@ -63,6 +63,9 @@ public class LjmLogActUser {
 
     @Column(name = "LJM_DEPARTMENT_CODE")
     private String departmentCode;
+    
+    @Column(name = "LJM_LOGIN_YN")
+    private String loginYesNo;
 
 	public String getLogActUser() {
 		return logActUser;
@@ -233,6 +236,14 @@ public class LjmLogActUser {
 		this.departmentCode = departmentCode;
 	}
 
-    
-    
+
+	public String getLoginYesNo() {
+		return loginYesNo;
+	}
+
+
+	public void setLoginYesNo(String loginYesNo) {
+		this.loginYesNo = loginYesNo;
+	}
+   
 }

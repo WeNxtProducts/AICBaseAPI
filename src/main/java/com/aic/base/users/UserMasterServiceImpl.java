@@ -11,10 +11,13 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 
 import org.apache.http.HttpHost;
 import org.elasticsearch.action.DocWriteResponse.Result;
@@ -514,6 +517,56 @@ public class UserMasterServiceImpl implements UserMasterService {
 		DateTimeFormatter formatters = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 		LocalDateTime parsedDateTime = LocalDateTime.parse(formattedDateTime, formatters);
 		return parsedDateTime;
+	}
+
+	@Override
+	public String existigUser(String userName) {
+		Optional<LM_MENU_USERS> optionalEntity = userrepo.findById(userName);
+		JSONObject response = new JSONObject();
+
+//		LM_MENU_USERS userDetails = optionalEntity.get();
+//		System.out.println(userDetails.getUserId());
+		if (optionalEntity.isPresent()) {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "Please Choose different userName");
+
+			List<String> suggestions = new ArrayList<>();
+			Random random = new Random();
+
+			int suggestionCount = 3;
+
+			for (int i = 0; i < suggestionCount * 2 && suggestions.size() < suggestionCount; i++) {
+				String suggestion;
+				if (i % 3 == 0) {
+					suggestion = userName + (random.nextInt(9000) + 1000);
+				} else if (i % 3 == 1) {
+					suggestion = userName + "_" + (random.nextInt(90) + 10);
+				} else {
+					suggestion = userName + "_" + UUID.randomUUID().toString().substring(0, 4);
+				}
+
+				if (!usernameExists(suggestion)) {
+					suggestions.add(suggestion);
+				}
+			}
+
+			response.put(dataCode, suggestions);
+		} else {
+			response.put(statusCode, successCode);
+			response.put(messageCode, "UserName is Unique");
+		}
+
+		return response.toString();
+	}
+
+	private boolean usernameExists(String suggestion) {
+		Optional<LM_MENU_USERS> optionalEntity = userrepo.findById(suggestion);
+		
+		if(optionalEntity.isPresent()) {
+			return true;
+		}else {
+			return false;
+		}
 	}
 
 }

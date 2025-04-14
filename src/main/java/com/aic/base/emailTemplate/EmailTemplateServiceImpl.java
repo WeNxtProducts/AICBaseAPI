@@ -94,7 +94,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 	@Value("${spring.data.code}")
 	private String dataCode;
 	
-	static final String username = "dinesh.b@wenxttech.com";
+	static final String username = "dineshbalamurugan85@gmail.com";
 	static final String appPassword = "bwrlxbcytzgcbvjb";
 
 	@Override
@@ -390,14 +390,14 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 	@Override
 	public String sendMail(Integer templateId, EmailRequestModel inputObject, HttpServletRequest request) {
-		
+
 		Map<String, MultipartFile> multiPartList = new HashMap<>();
 
 		JSONObject response = new JSONObject();
 		try {
-			String to = "dineshbalamurugan85@gmail.com";
-			String from = "dinesh.b@wenxttech.com";
-			String host = "smtp.office365.com";
+			String to = "ragularulkumaran@gmail.com";
+			String from = "dineshbalamurugan85@gmail.com";
+			String host = "smtp.gmail.com";
 
 			Properties properties = System.getProperties();
 			properties.put("mail.smtp.auth", "true");
@@ -407,7 +407,7 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 			Session session = Session.getInstance(properties, new jakarta.mail.Authenticator() {
 				protected PasswordAuthentication getPasswordAuthentication() {
-					return new PasswordAuthentication(username, appPassword);
+					return new PasswordAuthentication(username, "beja kxnm kdsa zkyx");
 				}
 			});
 
@@ -429,8 +429,10 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 						paramMap.put(param.getEP_PARAM_NAME(), param.getEP_VALUE());
 					}
 				} else if (param.getEP_TYPE().equals("Q")) {
-					List<QueryParamMasterDTO> queryParams = commonDao.getQueryParams(Integer.parseInt(param.getEP_VALUE()));
-					Map<String, Object> emailTemplateQueryParams = processEmailTemplateParams(queryParams, inputObject.getContent());
+					List<QueryParamMasterDTO> queryParams = commonDao
+							.getQueryParams(Integer.parseInt(param.getEP_VALUE()));
+					Map<String, Object> emailTemplateQueryParams = processEmailTemplateParams(queryParams,
+							inputObject.getContent());
 					if (param.getEP_PARAM_NAME().equals("to")) {
 						QUERY_MASTER queryMaster = commonDao.getQueryLov(Integer.parseInt(param.getEP_VALUE()));
 						String query = queryMaster.getQM_QUERY();
@@ -479,7 +481,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 				}
 			}
 
-			
+			for (int m = 0; m < inputObject.getToIds().size(); m++) {
+				toIds.append(inputObject.getToIds().get(m) + ",");
+			}
 			MimeMessage message = new MimeMessage(session);
 			message.setFrom(new InternetAddress(from));
 			if (inputObject.getToIds() != null && inputObject.getToIds().size() > 0) {
@@ -501,12 +505,11 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 			if (inputObject.getSubject() != null || !inputObject.getSubject().isEmpty()) {
 				paramMap.put("subject", inputObject.getSubject());
 			}
-			
+
 			StringBuilder attachments = new StringBuilder();
 			if (inputObject.getAttachments() != null && inputObject.getAttachments().size() > 0) {
 				Set<String> keys = inputObject.getAttachments().keySet();
 				for (String key : keys) {
-					
 
 					attachments.append(key + ",");
 					BASE64DecodedMultipartFile conv = new BASE64DecodedMultipartFile(
@@ -514,21 +517,20 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 					multiPartList.put(key, conv);
 				}
 			}
-			
+
 			Set<String> fileName = multiPartList.keySet();
-			
-			if(toIds.length() > 1) {
-			toIds.deleteCharAt(toIds.length() - 1);
+
+			if (toIds.length() > 1) {
+				toIds.deleteCharAt(toIds.length() - 1);
 			}
-			
-			if(ccIds.length() > 1) {
-			ccIds.deleteCharAt(ccIds.length() - 1);
+
+			if (ccIds.length() > 1) {
+				ccIds.deleteCharAt(ccIds.length() - 1);
 			}
-			
-			if(bccIds.length() > 1) {
-			bccIds.deleteCharAt(bccIds.length() - 1);
+
+			if (bccIds.length() > 1) {
+				bccIds.deleteCharAt(bccIds.length() - 1);
 			}
-			
 
 			InternetAddress[] recipients = InternetAddress.parse(toIds.toString());
 			InternetAddress[] toRecipients = InternetAddress.parse(ccIds.toString());
@@ -541,9 +543,14 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 			String formattedString = document.outerHtml();
 
+			System.out.println(formattedString);
+			System.out.println(paramMap);
+
 			for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
 				formattedString = formattedString.replace("$" + entry.getKey(), entry.getValue().toString());
 			}
+
+			System.out.println(formattedString);
 
 			message.setSubject(paramMap.get("subject").toString());
 			message.setText(formattedString);
@@ -553,40 +560,40 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 			Multipart multipart = new MimeMultipart();
 			multipart.addBodyPart(mimeBodyPart);
-			
+
 			for (String filename : fileName) {
-			    MimeBodyPart attachmentPart = new MimeBodyPart();
-			    String contentType = "application/octet-stream";
-			    if (filename.endsWith(".pdf")) {
-			        contentType = "application/pdf";
-			    } else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
-			        contentType = "image/jpeg";
-			    } else if (filename.endsWith(".json")) {
-			        contentType = "application/json";
-			    }
-			    
-			    attachmentPart.setDataHandler(new DataHandler(new ByteArrayDataSource(multiPartList.get(filename).getBytes(), contentType)));
-			    attachmentPart.setFileName(filename);
-			    multipart.addBodyPart(attachmentPart);
-}
-			
-			if(attachments.toString().length() > 0) {
-			attachments.deleteCharAt(attachments.toString().length()-1);
+				MimeBodyPart attachmentPart = new MimeBodyPart();
+				String contentType = "application/octet-stream";
+				if (filename.endsWith(".pdf")) {
+					contentType = "application/pdf";
+				} else if (filename.endsWith(".jpg") || filename.endsWith(".jpeg")) {
+					contentType = "image/jpeg";
+				} else if (filename.endsWith(".json")) {
+					contentType = "application/json";
+				}
+
+				attachmentPart.setDataHandler(
+						new DataHandler(new ByteArrayDataSource(multiPartList.get(filename).getBytes(), contentType)));
+				attachmentPart.setFileName(filename);
+				multipart.addBodyPart(attachmentPart);
+			}
+
+			if (attachments.toString().length() > 0) {
+				attachments.deleteCharAt(attachments.toString().length() - 1);
 			}
 			message.setContent(multipart);
 
 			Transport.send(message);
-			
-			 Document doc = Jsoup.parse(formattedString);
-		     String con = doc.text();
-		     
-			
+
+			Document doc = Jsoup.parse(formattedString);
+			String con = doc.text();
+
 			EmailLogsDTO logs = new EmailLogsDTO();
 			logs.setTo(toIds.toString());
 			logs.setTemplateName(emailTemplate.getET_TEMP_NAME());
 			logs.setTemplateBody(con);
 			logs.setGenDate(LocalDateTime.now());
-			logs.setAttachments(attachments.toString()); 
+			logs.setAttachments(attachments.toString());
 			loggingService.logToEmailHistoryLogs(logs, request);
 			response.put(statusCode, successCode);
 			response.put(messageCode, "Mail Sent Successfully");

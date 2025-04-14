@@ -12,12 +12,14 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter; 
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer; 
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-public class SecurityConfig { 
+public class SecurityConfig implements WebMvcConfigurer{ 
 
 	@Autowired
 	private JwtAuthFilter authFilter; 
@@ -27,6 +29,12 @@ public class SecurityConfig {
 	public UserDetailsService userDetailsService() { 
 		return new UserInfoService(); 
 	} 
+	
+	@Override
+	public void addInterceptors(InterceptorRegistry registry) {
+	    registry.addInterceptor(new TokenInterceptor())
+	            .addPathPatterns("/common/ltQuoteEdit");
+	}
 
 	// Configuring HttpSecurity 
 	@Bean
@@ -36,7 +44,7 @@ public class SecurityConfig {
 				.requestMatchers("/auth/generateToken").permitAll()
 				.and()
 				.authorizeHttpRequests() 
-				.requestMatchers("/auth/addNewUser").permitAll()
+				.requestMatchers("/auth/addNewUser").authenticated()
 				.and()
 				.authorizeHttpRequests() 
 				.requestMatchers("/swagger-ui/**").permitAll()
@@ -45,48 +53,48 @@ public class SecurityConfig {
 				.requestMatchers("/v3/**").permitAll()
 				.and()
 				.authorizeHttpRequests() 
-				.requestMatchers("/log/logger").permitAll()
+				.requestMatchers("/log/logger").authenticated()
 				.and()
 				.authorizeHttpRequests() 
 				.requestMatchers("/auth/**").permitAll()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/runasyncservice").permitAll()
+				.requestMatchers("/common/runasyncservice").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/editFields").permitAll()
+				.requestMatchers("/common/editFields").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/lovtoJson").permitAll()
+				.requestMatchers("/common/lovtoJson").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/getparamlov").permitAll()
+				.requestMatchers("/common/getparamlov").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/insertAudit").permitAll()
+				.requestMatchers("/common/insertAudit").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/emailTemplate/**").permitAll()
+				.requestMatchers("/emailTemplate/**").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/auth/expire-session**").permitAll()
+				.requestMatchers("/auth/expire-session**").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/**").permitAll()
+				.requestMatchers("/common/**").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/insertException").permitAll()
+				.requestMatchers("/common/insertException").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/rulesJson").permitAll()
+				.requestMatchers("/common/rulesJson").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("/common/boundaryConds").permitAll()
+				.requestMatchers("/common/boundaryConds").authenticated()
 				.and()
 				.authorizeHttpRequests()
-				.requestMatchers("common/invokeProcedure").permitAll()
+				.requestMatchers("common/invokeProcedure").authenticated()
 				.and()
-				.authorizeHttpRequests().requestMatchers("/common/getMapQuery").permitAll() 
+				.authorizeHttpRequests().requestMatchers("/common/getMapQuery").authenticated()
 				.and()
 				.authorizeHttpRequests().requestMatchers("/common/**").authenticated() 
 				.and()

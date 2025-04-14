@@ -12,4 +12,6 @@ public interface UserMasterService {
 	
 	public String createLmUser(RequestDataDto requestData);
 
+	public String existigUser(String userName);
+
 }

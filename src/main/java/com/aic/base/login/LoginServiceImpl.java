@@ -330,6 +330,7 @@ public class LoginServiceImpl implements LoginService {
 					newLogin.setLogActStatus("ACTIVE");
 					newLogin.setLogActLoginTime(new Timestamp(System.currentTimeMillis()));
 					newLogin.setLogActCrdt(new Timestamp(System.currentTimeMillis()));
+					newLogin.setLoginYesNo("Y");
 
 					actrepo.save(newLogin);
 
