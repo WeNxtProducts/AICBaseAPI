@@ -28,6 +28,7 @@ public class StaticJwtGenerator {
         staticToken = Jwts.builder()
                 .setSubject("staticUser")
                 .claim("role", "SYSTEM")
+                .claim("type", "static")
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + (30 * 60 * 1000))) // 30 mins
                 .signWith(SignatureAlgorithm.HS256, secretKey)
