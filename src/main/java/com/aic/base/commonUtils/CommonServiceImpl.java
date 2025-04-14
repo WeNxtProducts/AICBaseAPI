@@ -2133,6 +2133,9 @@ public class CommonServiceImpl implements CommonService {
  
 		JSONObject response = new JSONObject();
 		
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		
 		Map<String, Object> params = processParamLOV(null, request);
 		String url = baseCrudPath + "ltQquotAssuredDtls/get?tranId=" + params.get("tranId");
 		
@@ -2140,6 +2143,7 @@ public class CommonServiceImpl implements CommonService {
 		HttpHeaders headers = new HttpHeaders();
 		RestTemplate restTemplate = new RestTemplate();
 		headers.setContentType(MediaType.APPLICATION_JSON);
+		headers.set("Authorization", "Bearer " + token);
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
