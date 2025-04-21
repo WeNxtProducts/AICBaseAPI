@@ -16,6 +16,8 @@ public class LoginRequestModel {
 	
 	private String departmentCode;
 	
+	private String loginType;
+	
 	public String getUserName() {
 		return userName;
 	}
@@ -70,6 +72,14 @@ public class LoginRequestModel {
 
 	public void setDepartmentCode(String departmentCode) {
 		this.departmentCode = departmentCode;
+	}
+
+	public String getLoginType() {
+		return loginType;
+	}
+
+	public void setLoginType(String loginType) {
+		this.loginType = loginType;
 	}
 
 }

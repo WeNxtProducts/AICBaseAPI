@@ -2,6 +2,7 @@ package com.aic.base.login;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -255,6 +256,8 @@ public class LoginServiceImpl implements LoginService {
 	}
 
 	public String login(LoginRequestModel login) {
+		System.out.println("IN LOGIN" + login.getLoginType() + login.getUserName());
+		
 		JSONObject response = new JSONObject();
 		Map<String, Object> data = new HashMap<>();
 
@@ -273,18 +276,40 @@ public class LoginServiceImpl implements LoginService {
 
 		Optional<LjmLogActUser> existingLogin = actrepo.findByLogActUserAndLogActStatus(login.getUserName(), "ACTIVE");
 
-		if (existingLogin.isPresent()) {
+		if (existingLogin.isPresent() && !login.getLoginType().equals("Q")) {
 			response.put(statusCode, warningCode);
 			response.put(messageCode, "To continue, should we expire your current session and create a new one?");
 			return response.toString();
 		}
+		
+		Authentication authenticationToken = null;
+		Authentication authentication = null;
+		
+		Optional<LM_MENU_USERS> test = userrepo.findByUserId(login.getUserName());
+		
+//		System.out.println("PASSWORD: " + test.get().getUser_passwd());
 
-		Authentication authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
+		if(!login.getLoginType().equals("Q")) {
+		authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
 				login.getPassword());
-		Authentication authentication = authenticationManager.authenticate(authenticationToken);
+		authentication = authenticationManager.authenticate(authenticationToken);
+	} else {
+		Optional<LM_MENU_USERS> user = userrepo.findByUserId(login.getUserName());
+		if (user.isPresent()) {
+			if (login.getPassword().equals(user.get().getUser_passwd())) {
+				 authentication =
+				            new UsernamePasswordAuthenticationToken(login.getUserName(), null, Collections.emptyList());
+
+				        SecurityContextHolder.getContext().setAuthentication(authentication);
+				        System.out.println("IN");
+			}
+		}
+	}
 
 		if (authentication.isAuthenticated()) {
 			token = jwtService.generateToken(auth);
+			
+			System.out.println("AUTHENTICATED: " + token);
 
 			Optional<LM_MENU_USERS> menuUser = userrepo.findByUserId(login.getUserName());
 			if (!menuUser.isPresent()) {

@@ -33,7 +33,7 @@ public class SecurityConfig implements WebMvcConfigurer{
 	@Override
 	public void addInterceptors(InterceptorRegistry registry) {
 	    registry.addInterceptor(new TokenInterceptor())
-	            .addPathPatterns("/auth/expire-session**");
+	            .addPathPatterns("/log/logger");
 	}
 
 	// Configuring HttpSecurity 
@@ -67,9 +67,12 @@ public class SecurityConfig implements WebMvcConfigurer{
 //				.authorizeHttpRequests()
 //				.requestMatchers("/common/lovtoJson").authenticated()
 //				.and()
-//				.authorizeHttpRequests()
-//				.requestMatchers("/common/getparamlov").authenticated()
-//				.and()
+				.authorizeHttpRequests()
+				.requestMatchers("/common/getparamlov").permitAll()
+				.and()
+				.authorizeHttpRequests()
+				.requestMatchers("/common/rulesJson").permitAll()
+				.and()
 //				.authorizeHttpRequests()
 //				.requestMatchers("/common/insertAudit").authenticated()
 //				.and()
@@ -84,9 +87,6 @@ public class SecurityConfig implements WebMvcConfigurer{
 				.and()
 //				.authorizeHttpRequests()
 //				.requestMatchers("/common/insertException").authenticated()
-//				.and()
-//				.authorizeHttpRequests()
-//				.requestMatchers("/common/rulesJson").authenticated()
 //				.and()
 //				.authorizeHttpRequests()
 //				.requestMatchers("/common/boundaryConds").authenticated()

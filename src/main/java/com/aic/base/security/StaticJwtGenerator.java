@@ -22,15 +22,14 @@ public class StaticJwtGenerator {
         generateStaticToken();
     }
 
-    //Regenerate every 30 minutes (1800000 milliseconds)
-    @Scheduled(fixedRate = 30 * 60 * 1000)
+    @Scheduled(cron = "0 30 14 * * ?")
     public void generateStaticToken() {
         staticToken = Jwts.builder()
                 .setSubject("staticUser")
                 .claim("role", "SYSTEM")
                 .claim("type", "static")
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + (30 * 60 * 1000))) // 30 mins
+                .setExpiration(new Date(System.currentTimeMillis() + (24 * 60 * 60 * 1000)))
                 .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
