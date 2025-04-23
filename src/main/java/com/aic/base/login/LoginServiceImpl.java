@@ -276,7 +276,7 @@ public class LoginServiceImpl implements LoginService {
 
 		Optional<LjmLogActUser> existingLogin = actrepo.findByLogActUserAndLogActStatus(login.getUserName(), "ACTIVE");
 
-		if (existingLogin.isPresent() && !login.getLoginType().equals("Q")) {
+		if (existingLogin.isPresent() && (login.getLoginType() == null || !login.getLoginType().equals("Q"))) {
 			response.put(statusCode, warningCode);
 			response.put(messageCode, "To continue, should we expire your current session and create a new one?");
 			return response.toString();
@@ -289,7 +289,7 @@ public class LoginServiceImpl implements LoginService {
 		
 //		System.out.println("PASSWORD: " + test.get().getUser_passwd());
 
-		if(!login.getLoginType().equals("Q")) {
+		if(login.getLoginType() == null || !login.getLoginType().equals("Q")) {
 		authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
 				login.getPassword());
 		authentication = authenticationManager.authenticate(authenticationToken);

@@ -292,7 +292,8 @@ public class CommonServiceImpl implements CommonService {
 
 			for (MenuResultDTO data : list) {
 				if ("*".equals(data.getMenuParentId())) {
-
+					System.out.println(data.getListingQueryId());
+					data.setListingQueryId(data.getListingQueryId());
 					List<MenuResultDTO> child = (List<MenuResultDTO>) commonDao.getChildMenuList(data.getMenuId(),
 							groupId, childQuery.getQM_QUERY());
 
@@ -1849,6 +1850,15 @@ public class CommonServiceImpl implements CommonService {
 		Map<String, Object> parameters = new HashMap<>();
 		parameters.put("tranId", mrvRequestDto.getTranId());
 		parameters.put("emptranId", mrvRequestDto.getEmptranId());
+		if(mrvRequestDto.getOffset() != null) {
+			System.out.println("offset: "+ mrvRequestDto.getOffset());
+			parameters.put("offset", mrvRequestDto.getOffset());
+		}
+		
+		if(mrvRequestDto.getLimit() != null) {
+			System.out.println("limit: " + mrvRequestDto.getLimit());
+			parameters.put("limit", mrvRequestDto.getLimit());
+		}
 		List<Map<String, Object>> queryResult = commonDao.newMrvListing(query.getQM_QUERY(), parameters);
 		Map<String, Object> firstRow = queryResult.get(0);
 		Set<String> columnNames = firstRow.keySet();
@@ -2176,6 +2186,26 @@ public class CommonServiceImpl implements CommonService {
 		response.put(dataCode, obj);
 		return response.toString();
 	
+	}
+
+	@Override
+	public String claimIntimationEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "claimIntimation/get?tranId=" + params.get("tranId");
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+ 
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Claim Intimation Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
 	}
 	
 

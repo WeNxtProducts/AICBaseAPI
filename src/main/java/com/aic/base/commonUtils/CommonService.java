@@ -133,4 +133,6 @@ public interface CommonService {
 
 	public String ltQquotAssuredDtlsEdit(HttpServletRequest request);
 
+	public String claimIntimationEdit(HttpServletRequest request);
+
 }

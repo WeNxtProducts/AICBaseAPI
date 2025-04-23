@@ -429,6 +429,7 @@ public class CommonController {
 	
 	@GetMapping("/ltQuoteEdit")
 	public String ltQuoteEdit(HttpServletRequest request) {
+		System.out.println("IN");
 		try {
 			return service.ltQuoteEdit(request);
 		} catch (Exception e) {
@@ -471,6 +472,16 @@ public class CommonController {
 	public String ltQquotAssurdDtlsEdit(HttpServletRequest request) {
 		try {
 			return service.ltQquotAssuredDtlsEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+	
+	@GetMapping("/claimIntimedit")
+	public String claimIntimationEdit(HttpServletRequest request) {
+		try {
+			return service.claimIntimationEdit(request);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return e.getMessage();

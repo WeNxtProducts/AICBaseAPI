@@ -12,6 +12,12 @@ public class MrvRequestDTO {
 
 	@JsonProperty("emptranId")
 	private String emptranId;
+	
+	@JsonProperty("offset")
+	private Integer offset;
+	
+	@JsonProperty("limit")
+	private Integer limit;
 
 	public Integer getQueryId() {
 		return queryId;
@@ -35,6 +41,22 @@ public class MrvRequestDTO {
 
 	public void setEmptranId(String emptranId) {
 		this.emptranId = emptranId;
+	}
+
+	public Integer getOffset() {
+		return offset;
+	}
+
+	public void setOffset(Integer offset) {
+		this.offset = offset;
+	}
+
+	public Integer getLimit() {
+		return limit;
+	}
+
+	public void setLimit(Integer limit) {
+		this.limit = limit;
 	}
 
 }
