@@ -442,4 +442,52 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 		return response.toString();
 	}
 
+	@Override
+	public String getAddress(String custCode) {
+		JSONObject response = new JSONObject();
+		JSONObject resCurrentAddress = new JSONObject();
+		JSONObject currentAddress = new JSONObject();
+		JSONObject permanentAddress = new JSONObject();
+		JSONObject formFields = new JSONObject();
+		
+		try {
+			Optional<LM_CUSTOMER> optionalUser = cmrepo.findByCustCode(custCode);
+			LM_CUSTOMER user = optionalUser.orElse(null);
+			if(user != null) {
+			formFields.put("CUST_ADDR1", user.getCUST_ADDR1());
+			formFields.put("CUST_ADDR2", user.getCUST_ADDR2());
+			formFields.put("CUST_ADDR3", user.getCUST_ADDR3());
+			formFields.put("CUST_AREA", user.getCUST_AREA());
+			formFields.put("CUST_COUNTRY", user.getCUST_COUNTRY());
+			formFields.put("CUST_REGION", user.getCUST_REGION());
+			
+			currentAddress.put("formFields", formFields);
+			resCurrentAddress.put("current_address", currentAddress);
+			
+			formFields = new JSONObject();
+			formFields.put("CUST_PHY_ADDR1", user.getCUST_PHY_ADDR1());
+			formFields.put("CUST_PHY_ADDR2", user.getCUST_PHY_ADDR2());
+			formFields.put("CUST_PHY_ADDR3", user.getCUST_PHY_ADDR3());
+			formFields.put("CUST_PHY_AREA", user.getCUST_PHY_AREA());
+			formFields.put("CUST_PHY_COUNTRY", user.getCUST_PHY_COUNTRY());
+			formFields.put("CUST_PHY_REGION", user.getCUST_PHY_REGION());
+			
+			permanentAddress.put("formFields", formFields);
+			resCurrentAddress.put("permanent_address", permanentAddress);
+			
+			response.put(statusCode, successCode);
+			response.put(dataCode, resCurrentAddress);
+			}else {
+				System.out.println("Inside Else");
+				response.put(statusCode, errorCode);
+				response.put(messageCode, "No User Present");
+			}
+		}catch(Exception e) {
+			response.put(statusCode, errorCode);
+			response.put(messageCode, e.getLocalizedMessage());
+		}
+		
+		return response.toString();
+	}
+
 }

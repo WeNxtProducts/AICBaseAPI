@@ -31,4 +31,6 @@ public interface CustomerMasterService {
 
 	String updateCustomer(CustomerRequestDto requestData, String custCode);
 
+	String getAddress(String custCode);
+
 }

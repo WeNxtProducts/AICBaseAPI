@@ -79,5 +79,10 @@ public class CustomerMasterController {
 	public String deleteCurrency(@RequestParam Integer ID) {
 		return custom.deleteCurrency(ID);
 	}
+	
+	@GetMapping("/getAddress")
+	public String getAdddress(@RequestParam String custCode) {
+		return custom.getAddress(custCode);
+	}
 
 }
