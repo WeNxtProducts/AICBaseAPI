@@ -23,7 +23,6 @@ public class TokenInterceptor implements HandlerInterceptor {
 //		if (authHeader != null && authHeader.startsWith("Bearer ")) {
 			String token = authHeader.substring(7);
         String tokenType = decodeTokenType(token);
-        System.out.println("TOKEN TYPE: " + tokenType);
         if (!"THIRD".equals(tokenType)) {
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             response.getWriter().write("Jwt Token Invalid");
@@ -40,7 +39,6 @@ public class TokenInterceptor implements HandlerInterceptor {
 	                    .build()
 	                    .parseClaimsJws(token)
 	                    .getBody();
-	            System.out.println(claims.get("type"));
 	            return claims.get("type", String.class); // Get the "tokenType" claim
 	        } catch (JwtException e) {
 	            // Log the exception or handle it as needed

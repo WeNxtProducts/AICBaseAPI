@@ -54,7 +54,6 @@ public class UserController {
 	    
 	    @PostMapping("/customToken")
 	    public String getCustomToken(@RequestBody CustomTokenRequest customTokenRequest) {
-//	    	System.out.println("CUSTOM AUTH");
 	        return staticJwtGenerator.generateCustomToken(customTokenRequest.getUserName(), customTokenRequest.getEmail(), customTokenRequest.getMobileNumber());
 	    }
 

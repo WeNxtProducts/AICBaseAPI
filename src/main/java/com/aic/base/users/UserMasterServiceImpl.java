@@ -525,7 +525,6 @@ public class UserMasterServiceImpl implements UserMasterService {
 		JSONObject response = new JSONObject();
 
 //		LM_MENU_USERS userDetails = optionalEntity.get();
-//		System.out.println(userDetails.getUserId());
 		if (optionalEntity.isPresent()) {
 			response.put(statusCode, errorCode);
 			response.put(messageCode, "Please Choose different userName");

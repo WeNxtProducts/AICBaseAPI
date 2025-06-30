@@ -283,8 +283,11 @@ public class CommonServiceImpl implements CommonService {
 
 		QUERY_MASTER query = commonDao.getQueryLov(14);
 		List<MenuResultDTO> list = (List<MenuResultDTO>) commonDao.getMenuList(groupId, query.getQM_QUERY());
+//		System.out.println(query.getQM_QUERY() + " * " + groupId);
 		List<MenuResultDTO> finalResult = new ArrayList<>();
 		QUERY_MASTER childQuery = commonDao.getQueryLov(15);
+		
+		System.out.println(list.size());
 
 		if (list != null && !list.isEmpty()) {
 			response.put(statusCode, successCode);
@@ -292,8 +295,8 @@ public class CommonServiceImpl implements CommonService {
 
 			for (MenuResultDTO data : list) {
 				if ("*".equals(data.getMenuParentId())) {
-					System.out.println(data.getListingQueryId());
 					data.setListingQueryId(data.getListingQueryId());
+//					System.out.println(data.getMenuId() + " * " + groupId + " * " + childQuery.getQM_QUERY());
 					List<MenuResultDTO> child = (List<MenuResultDTO>) commonDao.getChildMenuList(data.getMenuId(),
 							groupId, childQuery.getQM_QUERY());
 
@@ -302,7 +305,7 @@ public class CommonServiceImpl implements CommonService {
 						List<MenuResultDTO> reportList = getReportMenuListAsList();
 						data.setChildrens(reportList);
 					} else if (child != null && !child.isEmpty()) {
-
+						
 						data.setChildrens(child);
 					}
 					finalResult.add(data);
@@ -647,7 +650,7 @@ public class CommonServiceImpl implements CommonService {
 			HttpEntity<String> requestEntity = new HttpEntity<>(jsonObject.toString(), headers);
 			String url = getBaseURL + object.getserv_url() + "?" + "screenCode=" + params.get("screenCode")
 					+ "&screenName=" + params.get("screenName");
-			System.out.println();
+
 			ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 			if (responseEntity.getStatusCode() == HttpStatus.OK) {
 				String serviceResponse = responseEntity.getBody();
@@ -674,7 +677,7 @@ public class CommonServiceImpl implements CommonService {
 
 		String file_path = basePath + params.get("screenName") + "_getLOVList.json";
 		QUERY_MASTER query = commonDao.getQueryLov(18);
-		System.out.println(query.getQM_QUERY());
+
 		if (query != null) {
 			List<LovToJsonDTO> result = commonDao.lovToJson(query.getQM_QUERY(), params.get("screenCode").toString(),
 					params.get("screenName").toString());
@@ -752,6 +755,8 @@ public class CommonServiceImpl implements CommonService {
 	@Override
 	public String customerMasterEdit(HttpServletRequest request)
 			throws IllegalArgumentException, IllegalAccessException {
+		
+		JSONObject response = new JSONObject();
 
 		Map<String, Object> parametermap = processParamLOV(null, request);
 		JSONObject inputObject = new JSONObject();
@@ -769,7 +774,15 @@ public class CommonServiceImpl implements CommonService {
 				inputObject.put(columnName, value);
 			}
 		}
-		return newEditTabs(request, inputObject);
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Customer Details Fetched Successfully");
+//		
+		String res = newEditTabs(request, inputObject);
+		
+		JSONObject obj =  new JSONObject(newEditTabs(request, inputObject));
+//		return newEditTabs(request, inputObject);
+		response.put(dataCode, obj);
+		return response.toString();
 	}
 
 	@Override
@@ -783,7 +796,7 @@ public class CommonServiceImpl implements CommonService {
 		Character isEditFlag = 'N';
 		boolean JSONempty = object.isEmpty();
 		Map<String, Object> parametermap = processParamLOV(null, request);
-
+		
 		QUERY_MASTER exeQuery = commonDao.getQueryLov(16);
 		JSONObject accordionResponse = new JSONObject();
 
@@ -1008,7 +1021,7 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		if(responseEntity.getBody() != null) {
-			System.out.println("IN");
+
 		JSONObject object = new JSONObject(responseEntity.getBody());
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
@@ -1789,6 +1802,7 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
+		System.out.println(object);
 
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
@@ -1851,12 +1865,12 @@ public class CommonServiceImpl implements CommonService {
 		parameters.put("tranId", mrvRequestDto.getTranId());
 		parameters.put("emptranId", mrvRequestDto.getEmptranId());
 		if(mrvRequestDto.getOffset() != null) {
-			System.out.println("offset: "+ mrvRequestDto.getOffset());
+
 			parameters.put("offset", mrvRequestDto.getOffset());
 		}
 		
 		if(mrvRequestDto.getLimit() != null) {
-			System.out.println("limit: " + mrvRequestDto.getLimit());
+
 			parameters.put("limit", mrvRequestDto.getLimit());
 		}
 		List<Map<String, Object>> queryResult = commonDao.newMrvListing(query.getQM_QUERY(), parameters);
@@ -1903,7 +1917,7 @@ public class CommonServiceImpl implements CommonService {
 		List<LM_USER_APPR_SETUP_DET> userSetup = userApprSetupRepo.getSetup(rulesJsonRequest.getUserId());
 
 		for (LM_USER_APPR_SETUP_DET setup : userSetup) {
-//			System.out.println(setup.getASD_CODE());
+
 			if (setup.getASD_FM_PROD_CODE().equals("0") && setup.getASD_TO_PROD_CODE().equals("zzzzzzzzzzzz")) {
 				if (data.get("ALL") != null) {
 					Map<String, LM_USER_APPR_SETUP_DET> innerData = data.get("ALL");
@@ -2149,7 +2163,6 @@ public class CommonServiceImpl implements CommonService {
 		Map<String, Object> params = processParamLOV(null, request);
 		String url = baseCrudPath + "ltQquotAssuredDtls/get?tranId=" + params.get("tranId");
 		
-		System.out.println(params.get("tranId"));
 		HttpHeaders headers = new HttpHeaders();
 		RestTemplate restTemplate = new RestTemplate();
 		headers.setContentType(MediaType.APPLICATION_JSON);
@@ -2200,10 +2213,39 @@ public class CommonServiceImpl implements CommonService {
 		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
 		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
 		JSONObject object = new JSONObject(responseEntity.getBody());
+		System.out.println(object);
  
 		JSONObject obj = new JSONObject(newEditTabs(request, object));
 		response.put(statusCode, successCode);
 		response.put(messageCode, "Claim Intimation Details Fetched Successfully");
+		response.put(dataCode, obj);
+		return response.toString();
+	}
+
+	@Override
+	public String planDtlMasterEdit(HttpServletRequest request) {
+		JSONObject response = new JSONObject();
+		
+		Map<String, Object> params = processParamLOV(null, request);
+		String url = baseCrudPath + "planDetailMaster/get?tranId=" + params.get("tranId");
+//		System.out.println(url);
+		HttpHeaders headers = new HttpHeaders();
+		RestTemplate restTemplate = new RestTemplate();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+		String authorizationHeader = request.getHeader("Authorization");
+		String token = authorizationHeader.substring(7).trim();
+		headers.set("Authorization", "Bearer " + token);
+		HttpEntity<String> requestEntity = new HttpEntity<>(headers);
+		ResponseEntity<String> responseEntity = restTemplate.postForEntity(url, requestEntity, String.class);
+		JSONObject object = new JSONObject(responseEntity.getBody());
+//		System.out.println(object);
+//		JSONObject obje = new JSONObject(object.get("Data"));
+		
+//		System.out.println(obje);
+ 
+		JSONObject obj = new JSONObject(newEditTabs(request, object));
+		response.put(statusCode, successCode);
+		response.put(messageCode, "Plan Detail Master Details Fetched Successfully");
 		response.put(dataCode, obj);
 		return response.toString();
 	}

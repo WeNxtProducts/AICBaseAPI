@@ -28,6 +28,11 @@ public class CustomerMasterController {
 	public String createCustomer(@RequestBody CustomerRequestDto requestData) {
 		return custom.createCustomer(requestData);
 	}
+	
+	@PostMapping("/update")
+	public String updateCustomer(@RequestBody CustomerRequestDto requestData, @RequestParam String custCode) {
+		return custom.updateCustomer(requestData, custCode);
+	}
 
 	@GetMapping("/customerList")
 	public String getAllCustomlist() throws JSONException, SQLException {

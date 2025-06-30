@@ -543,14 +543,9 @@ public class EmailTemplateServiceImpl implements EmailTemplateService {
 
 			String formattedString = document.outerHtml();
 
-			System.out.println(formattedString);
-			System.out.println(paramMap);
-
 			for (Map.Entry<String, Object> entry : paramMap.entrySet()) {
 				formattedString = formattedString.replace("$" + entry.getKey(), entry.getValue().toString());
 			}
-
-			System.out.println(formattedString);
 
 			message.setSubject(paramMap.get("subject").toString());
 			message.setText(formattedString);

@@ -135,4 +135,6 @@ public interface CommonService {
 
 	public String claimIntimationEdit(HttpServletRequest request);
 
+	public String planDtlMasterEdit(HttpServletRequest request);
+
 }

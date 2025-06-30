@@ -424,12 +424,10 @@ public class CommonController {
 	
 	@PostMapping("/test")
 	public void test() {
-		System.out.println("TEST");
 	}
 	
 	@GetMapping("/ltQuoteEdit")
 	public String ltQuoteEdit(HttpServletRequest request) {
-		System.out.println("IN");
 		try {
 			return service.ltQuoteEdit(request);
 		} catch (Exception e) {
@@ -482,6 +480,16 @@ public class CommonController {
 	public String claimIntimationEdit(HttpServletRequest request) {
 		try {
 			return service.claimIntimationEdit(request);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return e.getMessage();
+		}
+	}
+	
+	@GetMapping("/planDtlMasterEdit")
+	public String planDtlMasterEdit(HttpServletRequest request) {
+		try {
+			return service.planDtlMasterEdit(request);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return e.getMessage();

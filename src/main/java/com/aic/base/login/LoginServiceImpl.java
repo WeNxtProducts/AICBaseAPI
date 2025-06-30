@@ -256,7 +256,6 @@ public class LoginServiceImpl implements LoginService {
 	}
 
 	public String login(LoginRequestModel login) {
-		System.out.println("IN LOGIN" + login.getLoginType() + login.getUserName());
 		
 		JSONObject response = new JSONObject();
 		Map<String, Object> data = new HashMap<>();
@@ -286,8 +285,6 @@ public class LoginServiceImpl implements LoginService {
 		Authentication authentication = null;
 		
 		Optional<LM_MENU_USERS> test = userrepo.findByUserId(login.getUserName());
-		
-//		System.out.println("PASSWORD: " + test.get().getUser_passwd());
 
 		if(login.getLoginType() == null || !login.getLoginType().equals("Q")) {
 		authenticationToken = new UsernamePasswordAuthenticationToken(login.getUserName(),
@@ -301,15 +298,12 @@ public class LoginServiceImpl implements LoginService {
 				            new UsernamePasswordAuthenticationToken(login.getUserName(), null, Collections.emptyList());
 
 				        SecurityContextHolder.getContext().setAuthentication(authentication);
-				        System.out.println("IN");
 			}
 		}
 	}
 
 		if (authentication.isAuthenticated()) {
 			token = jwtService.generateToken(auth);
-			
-			System.out.println("AUTHENTICATED: " + token);
 
 			Optional<LM_MENU_USERS> menuUser = userrepo.findByUserId(login.getUserName());
 			if (!menuUser.isPresent()) {

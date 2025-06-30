@@ -29,4 +29,6 @@ public interface CustomerMasterService {
 
 	String deleteCurrency(Integer iD);
 
+	String updateCustomer(CustomerRequestDto requestData, String custCode);
+
 }

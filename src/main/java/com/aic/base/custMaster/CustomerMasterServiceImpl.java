@@ -23,6 +23,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.expression.ParseException;
 import org.springframework.stereotype.Service;
 
 import com.aic.base.commonUtils.LM_CUSTOMER;
@@ -125,9 +126,9 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 		if (optionalUser.isPresent()) {
 			LM_CUSTOMER existingUser = optionalUser.get();
 
-			existingUser.setCust_frz_flag("N");
-			existingUser.setCust_eff_fm_dt(currentDate1);
-			existingUser.setCust_eff_to_dt(currentDate1);
+			existingUser.setCUST_FRZ_FLAG("N");
+//			existingUser.setCUST_EFF(currentDate1);
+//			existingUser.setCust_eff_to_dt(currentDate1);
 
 			cmrepo.save(existingUser);
 
@@ -162,14 +163,14 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 		JSONObject data = new JSONObject();
 
 		try {
-			String custCode = requestData.getFrontForm().getFormFields().get("cust_code");
+			String custCode = requestData.getFrontForm().getFormFields().get("CUST_CODE");
 			Optional<LM_CUSTOMER> optionalUser = cmrepo.findByCustCode(custCode);
 			LM_CUSTOMER user = optionalUser.orElse(new LM_CUSTOMER());
 
 			Map<String, Map<String, String>> fieldMaps = new HashMap<>();
 			fieldMaps.put("frontForm", requestData.getFrontForm().getFormFields());
-			fieldMaps.put("permanent_address", requestData.getPermanent_address().getFormFields());
-			fieldMaps.put("current_address", requestData.getCurrent_address().getFormFields());
+//			fieldMaps.put("permanent_address", requestData.getPermanent_address().getFormFields());
+//			fieldMaps.put("current_address", requestData.getCurrent_address().getFormFields());
 
 			for (Map.Entry<String, Map<String, String>> entry : fieldMaps.entrySet()) {
 				setUserFields(user, entry.getValue());
@@ -177,14 +178,18 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 
 			// Save or update user to database
 			try {
-//				user.setCustCode("SD"+""+user.getCustCode());
+				if(custCode == null) {
+				user.setCustCode("SD"+""+custCode);
+				}else {
 				user.setCustCode(custCode);
-				user.setCust_frz_flag("N");
-				user.setCust_ml_name("DS");
-				user.setCust_ml_short_name("D");
-				user.setCust_national_id("AF");
-				user.setCust_name(user.getCUST_FIRST_NAME()+""+user.getCUST_MIDDLE_NAME()+""+user.getCUST_SUR_NAME());
-				user.setCust_short_name("WE");
+				}
+//				user.setCustCode(custCode);
+//				user.setCust_frz_flag("N");
+//				user.setCust_ml_name("DS");
+//				user.setCust_ml_short_name("D");
+//				user.setCust_national_id("AF");
+				user.setCUST_NAME(user.getCUST_FIRST_NAME()+""+user.getCUST_MIDDLE_NAME()+""+ user.getCUST_SURNAME());
+//				user.setCust_short_name("WE");
 				LM_CUSTOMER savedUser = cmrepo.save(user);
 				response.put(statusCode, successCode);
 				response.put(messageCode,
@@ -192,13 +197,13 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 				data.put("Id", savedUser.getCustCode());
 				response.put("data", data);
 			} catch (Exception e) {
-				response.put("statusCode", errorCode);
-				response.put("message", "An error occurred: " + e.getMessage());
+				response.put(statusCode, errorCode);
+				response.put(messageCode, "An error occurred: " + e.getMessage());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
-			response.put("statusCode", errorCode);
-			response.put("message", "An error occurred: " + e.getMessage());
+			response.put(statusCode, errorCode);
+			response.put(messageCode, "An error occurred: " + e.getMessage());
 		}
 
 		return response.toString();
@@ -233,11 +238,27 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 			return Double.parseDouble(value);
 		} else if (fieldType.equals(Short.class) && value.isEmpty() == false && value != null) {
 			return Short.parseShort(value);
-		} else if (fieldType.equals(LocalDateTime.class) && value.isEmpty() == false && value != null) {
+		}  else if (fieldType.equals(LocalDateTime.class) && value.isEmpty() == false && value != null) {
 			return dateTimeConverter(value);
+		} else if ((fieldType.equals(Date.class) || fieldType.equals(java.sql.Date.class))&& value.isEmpty() == false && value != null) {
+			return dateConverter(value);
 		} else {
 			return value;
 		}
+	}
+
+	private Object dateConverter(String value) {
+		String dateStr = value;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date date = null;
+		try {
+			date = (Date) sdf.parse(dateStr);
+		} catch (ParseException | java.text.ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		return date;
 	}
 
 	private void setUserField(LM_CUSTOMER user, String fieldName, String value) throws Exception {
@@ -246,7 +267,7 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 			Class<?> fieldType = field.getType();
 			Object convertedValue = convertStringToObject(value, fieldType);
 			String setterMethodName = "set" + fieldName.substring(0, 1).toUpperCase() + fieldName.substring(1);
-
+			System.out.println(fieldName);
 			if (value != null && !value.isEmpty()) {
 				Method setter = LM_CUSTOMER.class.getMethod(setterMethodName, fieldType);
 				setter.invoke(user, convertedValue);
@@ -364,6 +385,60 @@ public class CustomerMasterServiceImpl implements CustomerMasterService {
 				response.put(messageCode, e.getMessage());
 			}	
 			}
+		return response.toString();
+	}
+
+	@Override
+	public String updateCustomer(CustomerRequestDto requestData, String custCode) {
+		JSONObject response = new JSONObject();
+		JSONObject data = new JSONObject();
+
+		try {
+//			String custCode = requestData.getFrontForm().getFormFields().get("cust_code");
+			Optional<LM_CUSTOMER> optionalUser = cmrepo.findByCustCode(custCode);
+			LM_CUSTOMER user = optionalUser.get();
+
+			if (user != null) {
+				Map<String, Map<String, String>> fieldMaps = new HashMap<>();
+//			fieldMaps.put("frontForm", requestData.getFrontForm().getFormFields());
+				fieldMaps.put("permanent_address", requestData.getPermanent_address().getFormFields());
+				fieldMaps.put("current_address", requestData.getCurrent_address().getFormFields());
+
+				for (Map.Entry<String, Map<String, String>> entry : fieldMaps.entrySet()) {
+					setUserFields(user, entry.getValue());
+				}
+
+				// Save or update user to database
+				try {
+//				user.setCustCode("SD"+""+user.getCustCode());
+//					user.setCustCode(custCode);
+//				user.setCust_frz_flag("N");
+//				user.setCust_ml_name("DS");
+//				user.setCust_ml_short_name("D");
+//				user.setCust_national_id("AF");
+//					user.setCust_name(
+//							user.getCUST_FIRST_NAME() + "" + user.getCUST_MIDDLE_NAME() + "" + user.getCUST_SUR_NAME());
+//					user.setCust_short_name("WE");
+					LM_CUSTOMER savedUser = cmrepo.save(user);
+					response.put(statusCode, successCode);
+					response.put(messageCode,
+							optionalUser.isPresent() ? "User updated successfully" : "User created successfully");
+					data.put("Id", savedUser.getCustCode());
+					response.put("data", data);
+				} catch (Exception e) {
+					response.put(statusCode, errorCode);
+					response.put(messageCode, "An error occurred: " + e.getMessage());
+				}
+			} else {
+				response.put(statusCode, errorCode);
+				response.put(messageCode, "No Customer Present for given Customer Code");
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+			response.put("statusCode", errorCode);
+			response.put("message", "An error occurred: " + e.getMessage());
+		}
+
 		return response.toString();
 	}
 
